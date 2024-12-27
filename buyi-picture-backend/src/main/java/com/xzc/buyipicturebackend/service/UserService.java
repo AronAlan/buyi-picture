@@ -1,10 +1,14 @@
 package com.xzc.buyipicturebackend.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.xzc.buyipicturebackend.model.dto.UserQueryRequest;
 import com.xzc.buyipicturebackend.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xzc.buyipicturebackend.model.vo.LoginUserVo;
+import com.xzc.buyipicturebackend.model.vo.UserVo;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author xuzhichao
@@ -64,5 +68,27 @@ public interface UserService extends IService<User> {
      */
     boolean userLogout(HttpServletRequest request);
 
+    /**
+     * 获取单个用户信息（脱敏）
+     *
+     * @param user User
+     * @return 单个用户信息（脱敏
+     */
+    UserVo getUserVo(User user);
 
+    /**
+     * 获取多个用户信息（脱敏）
+     *
+     * @param userList User
+     * @return 多个用户信息的列表（脱敏
+     */
+    List<UserVo> getUserVoList(List<User> userList);
+
+    /**
+     * 根据用户查询分页请求 构造QueryWrapper
+     *
+     * @param userQueryRequest UserQueryRequest
+     * @return QueryWrapper<User>
+     */
+    QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 }
