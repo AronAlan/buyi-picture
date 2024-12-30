@@ -1,74 +1,134 @@
 declare namespace API {
-  type BaseResponseString_ = {
+  type BaseResponseBoolean_ = {
     code?: number
-    data?: string
+    data?: boolean
     message?: string
   }
 
-  type getLoginUsingGETParams = {
-    /** roleId */
-    roleId: string
-    /** userId */
-    userId: string
+  type BaseResponseLoginUserVo_ = {
+    code?: number
+    data?: LoginUserVo
+    message?: string
   }
 
-  type getRegExpUsingGETParams = {
-    /** regexp1 */
-    regexp1: string
+  type BaseResponseLong_ = {
+    code?: number
+    data?: number
+    message?: string
   }
 
-  type helloUsingDELETEParams = {
-    /** name */
-    name?: string
+  type BaseResponsePageUserVo_ = {
+    code?: number
+    data?: PageUserVo_
+    message?: string
   }
 
-  type helloUsingGETParams = {
-    /** name */
-    name?: string
+  type BaseResponseUser_ = {
+    code?: number
+    data?: User
+    message?: string
   }
 
-  type helloUsingPATCHParams = {
-    /** name */
-    name?: string
+  type BaseResponseUserVo_ = {
+    code?: number
+    data?: UserVo
+    message?: string
   }
 
-  type helloUsingPOSTParams = {
-    /** name */
-    name?: string
+  type DeleteRequest = {
+    id?: number
   }
 
-  type helloUsingPUTParams = {
-    /** name */
-    name?: string
+  type getUserByIdUsingGETParams = {
+    /** id */
+    id?: number
   }
 
-  type saveUserUsingDELETEParams = {
-    age?: number
-    name?: string
+  type getUserVoByIdUsingGETParams = {
+    /** id */
+    id?: number
   }
 
-  type saveUserUsingGETParams = {
-    age?: number
-    name?: string
+  type LoginUserVo = {
+    createTime?: string
+    editTime?: string
+    id?: number
+    updateTime?: string
+    userAccount?: string
+    userAvatar?: string
+    userName?: string
+    userProfile?: string
+    userRole?: string
   }
 
-  type saveUserUsingPATCHParams = {
-    age?: number
-    name?: string
-  }
-
-  type saveUserUsingPOSTParams = {
-    age?: number
-    name?: string
-  }
-
-  type saveUserUsingPUTParams = {
-    age?: number
-    name?: string
+  type PageUserVo_ = {
+    current?: number
+    pages?: number
+    records?: UserVo[]
+    size?: number
+    total?: number
   }
 
   type User = {
-    age?: number
-    name?: string
+    createTime?: string
+    editTime?: string
+    id?: number
+    isDelete?: number
+    updateTime?: string
+    userAccount?: string
+    userAvatar?: string
+    userName?: string
+    userPassword?: string
+    userProfile?: string
+    userRole?: string
+  }
+
+  type UserAddRequest = {
+    userAccount?: string
+    userAvatar?: string
+    userName?: string
+    userProfile?: string
+    userRole?: string
+  }
+
+  type UserLoginRequest = {
+    userAccount?: string
+    userPassword?: string
+  }
+
+  type UserQueryRequest = {
+    current?: number
+    id?: number
+    pageSize?: number
+    sortField?: string
+    sortOrder?: string
+    userAccount?: string
+    userName?: string
+    userProfile?: string
+    userRole?: string
+  }
+
+  type UserRegisterRequest = {
+    checkPassword?: string
+    userAccount?: string
+    userPassword?: string
+  }
+
+  type UserUpdateRequest = {
+    id?: number
+    userAvatar?: string
+    userName?: string
+    userProfile?: string
+    userRole?: string
+  }
+
+  type UserVo = {
+    createTime?: string
+    id?: number
+    userAccount?: string
+    userAvatar?: string
+    userName?: string
+    userProfile?: string
+    userRole?: string
   }
 }

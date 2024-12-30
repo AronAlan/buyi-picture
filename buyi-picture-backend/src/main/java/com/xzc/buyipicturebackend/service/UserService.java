@@ -72,7 +72,7 @@ public interface UserService extends IService<User> {
      * 获取单个用户信息（脱敏）
      *
      * @param user User
-     * @return 单个用户信息（脱敏
+     * @return 单个用户信息（脱敏）
      */
     UserVo getUserVo(User user);
 
@@ -80,7 +80,7 @@ public interface UserService extends IService<User> {
      * 获取多个用户信息（脱敏）
      *
      * @param userList User
-     * @return 多个用户信息的列表（脱敏
+     * @return 多个用户信息的列表（脱敏）
      */
     List<UserVo> getUserVoList(List<User> userList);
 
