@@ -5,15 +5,15 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 删除请求
+ * 图片上传请求
  *
  * @author xuzhichao
  */
 @Data
-public class DeleteRequest implements Serializable {
+public class PictureUploadRequest implements Serializable {
 
     /**
-     * id
+     * 图片 id（用于修改）
      */
     private Long id;
 
