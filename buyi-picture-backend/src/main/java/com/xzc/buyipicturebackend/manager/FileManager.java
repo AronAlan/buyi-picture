@@ -95,14 +95,14 @@ public class FileManager {
      */
     public void validPicture(MultipartFile multipartFile) {
         ThrowUtils.throwIf(multipartFile == null, ErrorCode.PARAMS_ERROR, "文件不能为空");
-        // 1. 校验文件大小
+        // 1. 校验文件大小（设定最大大小为20MB）
         long fileSize = multipartFile.getSize();
         final long ONE_M = 1024 * 1024L;
-        ThrowUtils.throwIf(fileSize > 2 * ONE_M, ErrorCode.PARAMS_ERROR, "文件大小不能超过 2M");
+        ThrowUtils.throwIf(fileSize > 20 * ONE_M, ErrorCode.PARAMS_ERROR, "文件大小不能超过 2M");
         // 2. 校验文件后缀
         String fileSuffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
         // 允许上传的文件后缀
-        final List<String> ALLOW_FORMAT_LIST = Arrays.asList("jpeg", "jpg", "png", "webp");
+        final List<String> ALLOW_FORMAT_LIST = Arrays.asList("jpeg", "JPEG", "jpg", "JPG", "png", "PNG", "webp");
         ThrowUtils.throwIf(!ALLOW_FORMAT_LIST.contains(fileSuffix), ErrorCode.PARAMS_ERROR, "文件类型错误");
     }
 

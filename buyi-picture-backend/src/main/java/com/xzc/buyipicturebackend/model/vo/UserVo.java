@@ -1,7 +1,11 @@
 package com.xzc.buyipicturebackend.model.vo;
 
+import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.xzc.buyipicturebackend.model.entity.Picture;
+import com.xzc.buyipicturebackend.model.entity.User;
 import lombok.Data;
+import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -50,4 +54,16 @@ public class UserVo implements Serializable {
     private Date createTime;
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 对象转封装类
+     */
+    public static UserVo objToVo(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserVo userVo = new UserVo();
+        BeanUtils.copyProperties(user, userVo);
+        return userVo;
+    }
 }

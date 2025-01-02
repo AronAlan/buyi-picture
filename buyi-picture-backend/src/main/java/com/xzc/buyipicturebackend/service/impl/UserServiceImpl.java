@@ -186,13 +186,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
     public UserVo getUserVo(User user) {
-        if (user==null){
-            return null;
-        }
-
-        UserVo userVo=new UserVo();
-        BeanUtils.copyProperties(user,userVo);
-        return userVo;
+        return UserVo.objToVo(user);
     }
 
     /**
@@ -239,6 +233,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         return queryWrapper;
     }
+
+    /**
+     * 是否为管理员
+     *
+     * @param user 用户
+     * @return 是否为管理员
+     */
+    @Override
+    public boolean isAdmin(User user) {
+        return user != null && UserRoleEnum.ADMIN.getValue().equals(user.getUserRole());
+    }
+
 
 }
 

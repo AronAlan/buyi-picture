@@ -63,6 +63,16 @@ const originItems = [
     title: '主页',
   },
   {
+    key: '/add_picture',
+    label: '创建图片',
+    title: '创建图片',
+  },
+  {
+    key: '/admin/pictureManage',
+    label: '图片管理',
+    title: '图片管理',
+  },
+  {
     key: '/admin/userManage',
     label: '用户管理',
     title: '用户管理',
@@ -70,7 +80,7 @@ const originItems = [
 ]
 // 根据权限过滤菜单项
 const filterMenus = (menus = [] as MenuProps['items']) => {
-  return menus?.filter((menu: any) => {
+  return menus?.filter((menu) => {
     // 管理员才能看到 /admin 开头的菜单
     if (menu?.key?.startsWith('/admin')) {
       const loginUser = loginUserStore.loginUser
@@ -91,7 +101,7 @@ router.afterEach((to, from, next) => {
   current.value = [to.path]
 })
 // 路由跳转事件
-const doMenuClick = ({ key }: any) => {
+const doMenuClick = ({ key }) => {
   router.push({
     path: key,
   })
