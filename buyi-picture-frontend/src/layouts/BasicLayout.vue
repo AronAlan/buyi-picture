@@ -35,5 +35,6 @@ import GlobalHeader from '@/components/GlobalHeader.vue'
   background: #efefef;
   padding: 16px;
   text-align: center;
+  margin-top: -20px;
 }
 </style>

@@ -166,6 +166,7 @@ onMounted(() => {
 <style scoped>
 #homePage {
   margin-bottom: 16px;
+  height: 100%;
 }
 #homePage .search-bar {
   max-width: 480px;

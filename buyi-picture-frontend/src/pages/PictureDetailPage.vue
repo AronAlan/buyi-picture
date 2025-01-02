@@ -55,12 +55,6 @@
                 <DownloadOutlined />
               </template>
             </a-button>
-            <a-button v-if="canEdit" :icon="h(EditOutlined)" type="default" @click="doEdit">
-              编辑
-            </a-button>
-            <a-button v-if="canEdit" :icon="h(DeleteOutlined)" danger @click="doDelete">
-              删除
-            </a-button>
           </a-space>
         </a-card>
       </a-col>
@@ -68,12 +62,11 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, h, onMounted, ref } from 'vue'
-import { deletePictureUsingPost, getPictureVoByIdUsingGet } from '@/api/pictureController'
+import { h, onMounted, ref } from 'vue'
+import { getPictureVoByIdUsingGet } from '@/api/pictureController'
 import { message } from 'ant-design-vue'
-import { DeleteOutlined, DownloadOutlined, EditOutlined } from '@ant-design/icons-vue'
+import { DownloadOutlined } from '@ant-design/icons-vue'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
-import { useRouter } from 'vue-router'
 import { downloadImage, formatSize } from '@/utils'
 interface Props {
   id: string | number
@@ -81,17 +74,6 @@ interface Props {
 const props = defineProps<Props>()
 const picture = ref<API.PictureVO>({})
 const loginUserStore = useLoginUserStore()
-// 是否具有编辑权限
-const canEdit = computed(() => {
-  const loginUser = loginUserStore.loginUser
-  // 未登录不可编辑
-  if (!loginUser.id) {
-    return false
-  }
-  // 仅本人或管理员可编辑
-  const user = picture.value.user || {}
-  return loginUser.id === user.id || loginUser.userRole === 'admin'
-})
 // 获取图片详情
 const fetchPictureDetail = async () => {
   try {
@@ -110,24 +92,6 @@ const fetchPictureDetail = async () => {
 onMounted(() => {
   fetchPictureDetail()
 })
-const router = useRouter()
-// 编辑
-const doEdit = () => {
-  router.push('/add_picture?id=' + picture.value.id)
-}
-// 删除数据
-const doDelete = async () => {
-  const id = picture.value.id
-  if (!id) {
-    return
-  }
-  const res = await deletePictureUsingPost({ id })
-  if (res.data.code === 0) {
-    message.success('删除成功')
-  } else {
-    message.error('删除失败')
-  }
-}
 // 下载图片
 const doDownload = () => {
   downloadImage(picture.value.url)

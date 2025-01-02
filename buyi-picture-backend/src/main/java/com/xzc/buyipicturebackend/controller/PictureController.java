@@ -98,6 +98,7 @@ public class PictureController {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
 
+        //TODO 后续改为在用户的“我的”里，集中删除
         // 删除
         boolean result = pictureService.removeById(id);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除失败，数据库错误");
@@ -235,6 +236,7 @@ public class PictureController {
         Picture oldPicture = pictureService.getById(id);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
 
+        //TODO 后续改为在用户的“我的”里，集中编辑
         // 仅本人或管理员可编辑
         User loginUser = userService.getLoginUser(request);
         if (!oldPicture.getUserId().equals(loginUser.getId()) || !userService.isAdmin(loginUser)) {
