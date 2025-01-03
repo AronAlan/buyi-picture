@@ -3,6 +3,7 @@ package com.xzc.buyipicturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xzc.buyipicturebackend.model.dto.PictureQueryRequest;
+import com.xzc.buyipicturebackend.model.dto.PictureReviewRequest;
 import com.xzc.buyipicturebackend.model.dto.PictureUploadRequest;
 import com.xzc.buyipicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -22,12 +23,15 @@ import java.io.IOException;
 public interface PictureService extends IService<Picture> {
 
     /**
-     * 上传图片
+     * 上传图片（可重新上传）（重新上传时，暂为直接在云中多上传一张图片，旧图片保留了，暂未删除）
+     * 用户和管理员皆可上传
+     * 用户上传图片（上传并提交修改图片相关信息）时，审核状态改为待审核
+     * 管理员上传图片时，自动过审
      *
-     * @param multipartFile        MultipartFile 文件
-     * @param pictureUploadRequest PictureUploadRequest 图片上传请求（包含图片id）
-     * @param loginUser            User
-     * @return PictureVO上传返回的结果
+     * @param multipartFile        图片文件
+     * @param pictureUploadRequest 上传图片后需填写图片信息
+     * @param loginUser            登录用户
+     * @return PictureVO（脱敏）
      */
     PictureVO uploadPicture(MultipartFile multipartFile,
                             PictureUploadRequest pictureUploadRequest,
@@ -65,7 +69,7 @@ public interface PictureService extends IService<Picture> {
      * Page<Picture> --> Page<PictureVO>
      *
      * @param picturePage Page<Picture>
-     * @param request HttpServletRequest
+     * @param request     HttpServletRequest
      * @return Page<PictureVO>
      */
     Page<PictureVO> getPictureVoPage(Page<Picture> picturePage, HttpServletRequest request);
@@ -77,4 +81,22 @@ public interface PictureService extends IService<Picture> {
      * @param picture 图片
      */
     void validPicture(Picture picture);
+
+    /**
+     * 图片审核（管理员）
+     *
+     * @param pictureReviewRequest PictureReviewRequest管理员进行审核发送到后端的请求
+     * @param loginUser            登录用户
+     */
+    void doPictureReview(PictureReviewRequest pictureReviewRequest, User loginUser);
+
+    /**
+     * 用户或管理员上传图片时，修改审核图片的审核状态
+     * 填充审核参数（审核状态，审核员Id，审核信息，审核时间）
+     *
+     * @param picture   Picture
+     * @param loginUser User
+     * @param isEdit    是否为修改（供显示审核信息中修改和上传的不同）
+     */
+    void fillReviewParams(Picture picture, User loginUser, Boolean isEdit);
 }

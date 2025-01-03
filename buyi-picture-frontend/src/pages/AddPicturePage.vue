@@ -75,7 +75,7 @@ const router = useRouter()
  * @param values
  */
 const handleSubmit = async (values) => {
-  console.log(values)
+  // console.log(values)
   const pictureId = picture.value.id
   if (!pictureId) {
     return

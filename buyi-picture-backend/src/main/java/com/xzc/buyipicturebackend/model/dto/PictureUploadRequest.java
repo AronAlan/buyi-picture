@@ -13,7 +13,7 @@ import java.io.Serializable;
 public class PictureUploadRequest implements Serializable {
 
     /**
-     * 图片 id（用于修改）
+     * 图片 id（用于修改，上传按钮第二次及以后按，相当于上传错了）
      */
     private Long id;
 

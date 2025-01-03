@@ -1,5 +1,12 @@
 <template>
   <div id="pictureManagePage">
+    <a-flex justify="space-between">
+      <h2>图片管理</h2>
+      <a-space>
+        <a-button type="primary" href="/add_picture" target="_blank">+ 创建图片</a-button>
+      </a-space>
+    </a-flex>
+    <div style="margin-bottom: 16px" />
     <!-- 搜索表单 -->
     <a-form layout="inline" :model="searchParams" @finish="doSearch">
       <a-form-item label="关键词">
@@ -21,6 +28,15 @@
           allow-clear
         />
       </a-form-item>
+      <a-form-item name="reviewStatus" label="审核状态">
+        <a-select
+          v-model:value="searchParams.reviewStatus"
+          style="min-width: 180px"
+          placeholder="请选择审核状态"
+          :options="PIC_REVIEW_STATUS_OPTIONS"
+          allow-clear
+        />
+      </a-form-item>
       <a-form-item>
         <a-space>
           <a-button type="primary" html-type="submit">搜索</a-button>
@@ -34,6 +50,7 @@
       :columns="columns"
       :data-source="dataList"
       :pagination="pagination"
+      :scroll="{ x: 1500 }"
       @change="doTableChange"
     >
       <template #bodyCell="{ column, record }">
@@ -42,9 +59,7 @@
         </template>
         <template v-if="column.dataIndex === 'tags'">
           <a-space wrap>
-            <a-tag v-for="tag in JSON.parse(record.tags || '[]')" :key="tag">
-              {{ tag }}
-            </a-tag>
+            <ColorfulTag v-for="tag in JSON.parse(record.tags || '[]')" :key="tag" :text="tag" />
           </a-space>
         </template>
         <template v-if="column.dataIndex === 'picInfo'">
@@ -59,6 +74,14 @@
             <!-- 默认只显示大小信息 -->
             <div>{{ (record.picSize / 1024).toFixed(2) }}KB</div>
           </a-tooltip>
+        </template>
+        <template v-if="column.dataIndex === 'reviewMessage'">
+          <div>审核状态：{{ PIC_REVIEW_STATUS_MAP[record.reviewStatus] }}</div>
+          <div>审核信息：{{ record.reviewMessage }}</div>
+          <div>审核人：{{ record.reviewerId }}</div>
+          <div v-if="record.reviewTime">
+            审核时间：{{ dayjs(record.reviewTime).format('YYYY-MM-DD HH:mm:ss') }}
+          </div>
         </template>
         <template v-if="column.dataIndex === 'createTime'">
           {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
@@ -87,9 +110,51 @@
             </div>
           </a-tooltip>
         </template>
+        <template v-if="column.dataIndex === 'category'">
+          <ColorfulTag :text="record.category" :use-fixed="true" />
+        </template>
         <template v-else-if="column.key === 'action'">
-          <a-space>
-            <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank">
+          <a-space wrap>
+            <a-popconfirm
+              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.PASS"
+              title="确定要通过这张图片吗？"
+              ok-text="确认"
+              cancel-text="取消"
+              @confirm="handleReview(record, PIC_REVIEW_STATUS_ENUM.PASS)"
+            >
+              <a-button
+                type="primary"
+                size="small"
+                style="background-color: #52c41a; border-color: #52c41a"
+              >
+                <template #icon><check-outlined /></template>
+                通过
+              </a-button>
+            </a-popconfirm>
+            <a-popconfirm
+              v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.REJECT"
+              title="确定要拒绝这张图片吗？"
+              ok-text="确认"
+              cancel-text="取消"
+              @confirm="handleReview(record, PIC_REVIEW_STATUS_ENUM.REJECT)"
+            >
+              <a-button
+                type="primary"
+                size="small"
+                style="background-color: #faad14; border-color: #faad14"
+              >
+                <template #icon><close-outlined /></template>
+                拒绝
+              </a-button>
+            </a-popconfirm>
+            <a-button
+              type="primary"
+              size="small"
+              :href="`/add_picture?id=${record.id}`"
+              target="_blank"
+              style="background-color: #1890ff; border-color: #1890ff"
+            >
+              <template #icon><edit-outlined /></template>
               编辑
             </a-button>
             <a-popconfirm
@@ -98,7 +163,10 @@
               cancel-text="取消"
               @confirm="doDelete(record.id)"
             >
-              <a-button danger>删除</a-button>
+              <a-button type="primary" danger size="small">
+                <template #icon><delete-outlined /></template>
+                删除
+              </a-button>
             </a-popconfirm>
           </a-space>
         </template>
@@ -108,9 +176,21 @@
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { deletePictureUsingPost, listPictureByPageUsingPost } from '@/api/pictureController'
+import {
+  deletePictureUsingPost,
+  doPictureReviewUsingPost,
+  listPictureByPageUsingPost,
+} from '@/api/pictureController'
 import { message, Modal } from 'ant-design-vue'
 import dayjs from 'dayjs'
+import {
+  PIC_REVIEW_STATUS_ENUM,
+  PIC_REVIEW_STATUS_MAP,
+  PIC_REVIEW_STATUS_OPTIONS,
+} from '../../constants/picture.ts'
+import { CheckOutlined, CloseOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import ColorfulTag from '@/components/ColorfulTag.vue'
+
 const columns = [
   {
     title: 'id',
@@ -123,6 +203,7 @@ const columns = [
     title: '图片',
     dataIndex: 'url',
     align: 'center',
+    width: 200,
   },
   {
     title: '名称',
@@ -163,6 +244,11 @@ const columns = [
     ellipsis: true,
   },
   {
+    title: '审核信息',
+    dataIndex: 'reviewMessage',
+    width: 250,
+  },
+  {
     title: '创建时间',
     dataIndex: 'createTime',
     width: 130,
@@ -177,7 +263,7 @@ const columns = [
   {
     title: '操作',
     key: 'action',
-    width: 170,
+    width: 250,
     align: 'center',
   },
 ]
@@ -265,5 +351,23 @@ const showDeleteConfirm = (id: string) => {
       await doDelete(id)
     },
   })
+}
+
+// 审核图片
+const handleReview = async (record: API.Picture, reviewStatus: number) => {
+  const reviewMessage =
+    reviewStatus === PIC_REVIEW_STATUS_ENUM.PASS ? '管理员审核通过' : '管理员审核拒绝'
+  const res = await doPictureReviewUsingPost({
+    id: record.id,
+    reviewStatus,
+    reviewMessage,
+  })
+  if (res.data.code === 0) {
+    message.success('审核操作成功')
+    // 重新获取列表数据
+    fetchData()
+  } else {
+    message.error('审核操作失败，' + res.data.message)
+  }
 }
 </script>

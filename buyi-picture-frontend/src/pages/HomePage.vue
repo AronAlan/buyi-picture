@@ -49,12 +49,8 @@
             <a-card-meta :title="picture.name">
               <template #description>
                 <a-flex>
-                  <a-tag color="green">
-                    {{ picture.category ?? '默认' }}
-                  </a-tag>
-                  <a-tag v-for="tag in picture.tags" :key="tag">
-                    {{ tag }}
-                  </a-tag>
+                  <a-tag color="default">{{ picture.category ?? '默认' }}</a-tag>
+                  <ColorfulTag v-for="tag in picture.tags" :key="tag" :text="tag" />
                 </a-flex>
               </template>
             </a-card-meta>
@@ -73,6 +69,7 @@ import {
 } from '@/api/pictureController'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router' // 定义数据
+import ColorfulTag from '@/components/ColorfulTag.vue'
 // 定义数据
 const dataList = ref<API.PictureVO[]>([])
 const total = ref(0)

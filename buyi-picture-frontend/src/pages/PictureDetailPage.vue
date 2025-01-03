@@ -1,10 +1,13 @@
 <template>
   <div id="pictureDetailPage">
+    <div style="text-align: left; margin-bottom: 16px;"> <!-- 修改为左对齐 -->
+      <h3 style="font-weight: bold; font-size: 1.5em;">图片详情</h3> <!-- 加粗并放大 -->
+    </div>
     <a-row :gutter="[16, 16]">
       <!-- 图片预览 -->
       <a-col :sm="24" :md="16" :xl="18">
-        <a-card title="图片预览">
-          <a-image :src="picture.url" style="max-height: 600px; object-fit: contain" />
+        <a-card style="display: flex; justify-content: center;">
+          <a-image :src="picture.url" style="max-height: 600px; object-fit: contain;" />
         </a-card>
       </a-col>
       <!-- 图片信息区域 -->
@@ -27,9 +30,7 @@
               {{ picture.category ?? '默认' }}
             </a-descriptions-item>
             <a-descriptions-item label="标签">
-              <a-tag v-for="tag in picture.tags" :key="tag">
-                {{ tag }}
-              </a-tag>
+              <ColorfulTag v-for="tag in picture.tags" :key="tag" :text="tag" :useFixed="false" />
             </a-descriptions-item>
             <a-descriptions-item label="格式">
               {{ picture.picFormat ?? '-' }}
@@ -68,6 +69,7 @@ import { message } from 'ant-design-vue'
 import { DownloadOutlined } from '@ant-design/icons-vue'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import { downloadImage, formatSize } from '@/utils'
+import ColorfulTag from '@/components/ColorfulTag.vue'
 interface Props {
   id: string | number
 }
