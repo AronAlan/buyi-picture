@@ -119,7 +119,7 @@ public class PictureController {
         ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
 
         // 仅本人或管理员可删除
-        if (!picture.getUserId().equals(loginUser.getId()) || !userService.isAdmin(loginUser)) {
+        if (!picture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
 
@@ -270,9 +270,9 @@ public class PictureController {
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
 
         // TODO 后续改为在用户的“我的”里，集中编辑
-        // 仅本人或管理员可编辑
+        // 仅本人或管理员可编辑（不是本人创建，且本人不是管理员，抛异常）
         User loginUser = userService.getLoginUser(request);
-        if (!oldPicture.getUserId().equals(loginUser.getId()) || !userService.isAdmin(loginUser)) {
+        if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
 
