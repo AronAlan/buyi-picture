@@ -50,7 +50,7 @@ public class PictureController {
     private PictureService pictureService;
 
     /**
-     * 上传图片（可重新上传）（重新上传时，暂为直接在云中多上传一张图片，旧图片保留了，暂未删除）
+     * 上传本地图片（可重新上传）（重新上传时，暂为直接在云中多上传一张图片，旧图片保留了，暂未删除）
      * 用户和管理员皆可上传
      * 用户上传图片（上传并提交修改图片相关信息）时，审核状态改为待审核
      * 管理员上传图片时，自动过审
@@ -68,6 +68,23 @@ public class PictureController {
         // 新增或更新图片
         User loginUser = userService.getLoginUser(request);
         PictureVO pictureVO = pictureService.uploadPicture(multipartFile, pictureUploadRequest, loginUser);
+        return ResultUtils.success(pictureVO);
+    }
+
+    /**
+     * 上传url图片（可重新上传）
+     *
+     * @param pictureUploadRequest 上传图片后需填写图片信息
+     * @param request              HttpServletRequest
+     * @return PictureVO（脱敏）
+     */
+    @PostMapping("/upload/url")
+    public BaseResponse<PictureVO> uploadPictureByUrl(@RequestBody PictureUploadRequest pictureUploadRequest
+            , HttpServletRequest request) {
+        // 新增或更新图片
+        User loginUser = userService.getLoginUser(request);
+        String fileUrl = pictureUploadRequest.getFileUrl();
+        PictureVO pictureVO = pictureService.uploadPicture(fileUrl, pictureUploadRequest, loginUser);
         return ResultUtils.success(pictureVO);
     }
 
@@ -252,7 +269,7 @@ public class PictureController {
         Picture oldPicture = pictureService.getById(id);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
 
-        //TODO 后续改为在用户的“我的”里，集中编辑
+        // TODO 后续改为在用户的“我的”里，集中编辑
         // 仅本人或管理员可编辑
         User loginUser = userService.getLoginUser(request);
         if (!oldPicture.getUserId().equals(loginUser.getId()) || !userService.isAdmin(loginUser)) {
@@ -278,7 +295,9 @@ public class PictureController {
     @GetMapping("/tag_category")
     public BaseResponse<PictureTagCategory> listPictureTagCategory() {
         PictureTagCategory pictureTagCategory = new PictureTagCategory();
+        // 标签
         List<String> tagList = Arrays.asList("热门", "高清壁纸", "头像", "搞笑", "生活", "高清", "艺术", "校园", "背景", "简历", "创意");
+        // 分类
         List<String> categoryList = Arrays.asList("壁纸", "头像", "模板", "电商", "表情包", "素材", "海报");
         pictureTagCategory.setTagList(tagList);
         pictureTagCategory.setCategoryList(categoryList);

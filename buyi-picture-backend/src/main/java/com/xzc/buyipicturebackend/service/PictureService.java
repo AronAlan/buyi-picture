@@ -28,12 +28,12 @@ public interface PictureService extends IService<Picture> {
      * 用户上传图片（上传并提交修改图片相关信息）时，审核状态改为待审核
      * 管理员上传图片时，自动过审
      *
-     * @param multipartFile        图片文件
+     * @param inputSource          输入源（本地文件或url）
      * @param pictureUploadRequest 上传图片后需填写图片信息
      * @param loginUser            登录用户
      * @return PictureVO（脱敏）
      */
-    PictureVO uploadPicture(MultipartFile multipartFile,
+    PictureVO uploadPicture(Object inputSource,
                             PictureUploadRequest pictureUploadRequest,
                             User loginUser);
 

@@ -12,7 +12,10 @@ import com.qcloud.cos.utils.IOUtils;
 import com.xzc.buyipicturebackend.exception.BusinessException;
 import com.xzc.buyipicturebackend.exception.ErrorCode;
 import com.xzc.buyipicturebackend.exception.ThrowUtils;
-import com.xzc.buyipicturebackend.manager.FileManager;
+import com.xzc.buyipicturebackend.manager.download.DownloadManager;
+import com.xzc.buyipicturebackend.manager.upload.FilePictureUpload;
+import com.xzc.buyipicturebackend.manager.upload.PictureUploadTemplate;
+import com.xzc.buyipicturebackend.manager.upload.UrlPictureUpload;
 import com.xzc.buyipicturebackend.mapper.PictureMapper;
 import com.xzc.buyipicturebackend.model.dto.PictureQueryRequest;
 import com.xzc.buyipicturebackend.model.dto.PictureReviewRequest;
@@ -51,10 +54,16 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         implements PictureService {
 
     @Resource
-    private FileManager fileManager;
+    private DownloadManager downloadManager;
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private FilePictureUpload filePictureUpload;
+
+    @Resource
+    private UrlPictureUpload urlPictureUpload;
 
     /**
      * 上传图片（可重新上传）（重新上传时，暂为直接在云中多上传一张图片，旧图片保留了，暂未删除）
@@ -62,14 +71,15 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
      * 用户上传图片（上传并提交修改图片相关信息）时，审核状态改为待审核
      * 管理员上传图片时，自动过审
      *
-     * @param multipartFile        图片文件
+     * @param inputSource          输入源（本地文件或url）
      * @param pictureUploadRequest 上传图片后需填写图片信息
      * @param loginUser            登录用户
      * @return PictureVO（脱敏）
      */
     @Override
-    public PictureVO uploadPicture(MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, User loginUser) {
+    public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
+        ThrowUtils.throwIf(inputSource==null,ErrorCode.PARAMS_ERROR,"图片为空");
 
         //判断是新增还是更新图片
         Long pictureId = null;
@@ -92,10 +102,16 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             }
         }
 
-        // 按照用户id划分目录
+        // 按照用户id划分目录。存放在COS的public目录下
         String uploadPathPrefix = String.format("public/%s", loginUser.getId());
-        // 上传图片，得到返回信息
-        UploadPictureResult uploadPictureResult = fileManager.uploadPicture(multipartFile, uploadPathPrefix);
+
+        // 上传图片，得到返回信息（根据inputSource类型区分上传方式，本地图片或url）
+        PictureUploadTemplate pictureUploadTemplate=filePictureUpload;
+        if (inputSource instanceof String){
+            pictureUploadTemplate=urlPictureUpload;
+        }
+        UploadPictureResult uploadPictureResult = pictureUploadTemplate.uploadPicture(inputSource, uploadPathPrefix);
+
         // 构造要入库的图片信息
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());
@@ -139,7 +155,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     public void downloadPicture(String filepath, HttpServletResponse response) throws IOException {
         COSObjectInputStream cosObjectInput = null;
         try {
-            COSObject cosObject = fileManager.getObject(filepath);
+            COSObject cosObject = downloadManager.getObject(filepath);
             cosObjectInput = cosObject.getObjectContent();
             // 处理下载到的流
             byte[] bytes = IOUtils.toByteArray(cosObjectInput);
@@ -352,7 +368,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             picture.setReviewerId(loginUser.getId());
             if (isEdit) {
                 picture.setReviewMessage("管理员编辑，自动过审");
-            }else {
+            } else {
                 picture.setReviewMessage("管理员上传，自动过审");
             }
             picture.setReviewTime(new Date());
