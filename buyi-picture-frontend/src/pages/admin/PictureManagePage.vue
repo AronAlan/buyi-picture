@@ -111,7 +111,7 @@
           </a-tooltip>
         </template>
         <template v-if="column.dataIndex === 'category'">
-          <ColorfulTag :text="record.category" :use-fixed="true" />
+          <ColorfulTag v-if="record.category" :text="record.category" :use-fixed="true" />
         </template>
         <template v-else-if="column.key === 'action'">
           <a-space wrap>
