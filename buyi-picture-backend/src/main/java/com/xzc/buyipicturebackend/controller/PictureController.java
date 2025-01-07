@@ -322,5 +322,24 @@ public class PictureController {
         return ResultUtils.success(true);
     }
 
+    /**
+     * 批量创建（抓取）图片
+     *
+     * @param pictureUploadByBatchRequest 批量抓取图片请求（关键词，条数，名称前缀）
+     * @param request                     HttpServletRequest
+     * @return 上传成功的图片数量
+     */
+    @PostMapping("/upload/batch")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Integer> uploadPictureByBatch(
+            @RequestBody PictureUploadByBatchRequest pictureUploadByBatchRequest,
+            HttpServletRequest request
+    ) {
+        ThrowUtils.throwIf(pictureUploadByBatchRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        int uploadCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
+        return ResultUtils.success(uploadCount);
+    }
+
 
 }

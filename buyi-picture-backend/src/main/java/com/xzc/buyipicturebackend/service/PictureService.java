@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xzc.buyipicturebackend.model.dto.PictureQueryRequest;
 import com.xzc.buyipicturebackend.model.dto.PictureReviewRequest;
+import com.xzc.buyipicturebackend.model.dto.PictureUploadByBatchRequest;
 import com.xzc.buyipicturebackend.model.dto.PictureUploadRequest;
 import com.xzc.buyipicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -99,4 +100,17 @@ public interface PictureService extends IService<Picture> {
      * @param isEdit    是否为修改（供显示审核信息中修改和上传的不同）
      */
     void fillReviewParams(Picture picture, User loginUser, Boolean isEdit);
+
+    /**
+     * 批量抓取和创建图片
+     *
+     * @param pictureUploadByBatchRequest 批量抓取图片请求
+     * @param loginUser 登录用户
+     * @return 成功创建的图片数
+     */
+    Integer uploadPictureByBatch(
+            PictureUploadByBatchRequest pictureUploadByBatchRequest,
+            User loginUser
+    );
+
 }
