@@ -2,6 +2,8 @@ package com.xzc.buyipicturebackend.model.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 批量抓取图片请求
  *
@@ -24,5 +26,15 @@ public class PictureUploadByBatchRequest {
      * 名称前缀
      */
     private String namePrefix;
+
+    /**
+     * 分类
+     */
+    private String category;
+
+    /**
+     * 标签
+     */
+    private List<String> tags;
 
 }

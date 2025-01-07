@@ -23,6 +23,35 @@
           allow-clear
         />
       </a-form-item>
+      <a-form-item name="category" label="分类">
+        <a-select
+          v-model:value="formData.category"
+          placeholder="请选择分类"
+          style="width: 100%"
+          allow-clear
+        >
+          <a-select-option
+            v-for="category in categoryList"
+            :key="category.id"
+            :value="category.name"
+          >
+            {{ category.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item name="tags" label="标签">
+        <a-select
+          v-model:value="formData.tags"
+          mode="multiple"
+          placeholder="请选择标签"
+          style="width: 100%"
+          allow-clear
+        >
+          <a-select-option v-for="tag in tagList" :key="tag.id" :value="tag.name">
+            {{ tag.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
       <a-form-item>
         <a-button type="primary" html-type="submit" style="width: 100%" :loading="loading">
           执行任务
@@ -42,10 +71,18 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 const formData = reactive<API.PictureUploadByBatchRequest>({
   count: 10,
+  searchText: '',
+  namePrefix: '',
+  category: undefined,
+  tags: [],
 })
 // 提交任务状态
 const loading = ref(false)
 const router = useRouter()
+// 分类列表
+const categoryList = ref<API.PictureCategory[]>([])
+// 标签列表
+const tagList = ref<API.PictureTag[]>([])
 /**
  * 提交表单
  * @param values
@@ -67,6 +104,33 @@ const handleSubmit = async (values: any) => {
   }
   loading.value = false
 }
+// 获取分类和标签数据
+const loadData = async () => {
+  try {
+    const tagCategoryRes = await listPictureTagCategoryUsingGet()
+    console.log('标签分类数据:', tagCategoryRes?.data)
+    if (tagCategoryRes?.data?.data) {
+      // 设置分类列表
+      categoryList.value = tagCategoryRes.data.data.categoryList.map(
+        (name: string, index: number) => ({
+          id: index + 1,
+          name: name,
+        }),
+      )
+      // 设置标签列表
+      tagList.value = tagCategoryRes.data.data.tagList.map((name: string, index: number) => ({
+        id: index + 1,
+        name: name,
+      }))
+    }
+  } catch (error) {
+    console.error('加载数据失败:', error)
+    message.error('加载分类和标签数据失败')
+  }
+}
+onMounted(() => {
+  loadData()
+})
 </script>
 <style scoped>
 #addPictureBatchPage {

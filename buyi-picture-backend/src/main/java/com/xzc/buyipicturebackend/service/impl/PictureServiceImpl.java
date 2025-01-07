@@ -130,6 +130,12 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         picture.setPicScale(uploadPictureResult.getPicScale());
         picture.setPicFormat(uploadPictureResult.getPicFormat());
         picture.setUserId(loginUser.getId());
+        if (pictureUploadRequest != null && StrUtil.isNotBlank(pictureUploadRequest.getCategory())) {
+            picture.setCategory(pictureUploadRequest.getCategory());
+        }
+        if (pictureUploadRequest != null && CollUtil.isNotEmpty(pictureUploadRequest.getTags())) {
+            picture.setTags(JSONUtil.toJsonStr(pictureUploadRequest.getTags()));
+        }
         // 补充审核参数（用户和管理员都可上传图片，用户上传改为待审核，管理员上传自动过审）
         fillReviewParams(picture, loginUser, false);
         //如果pictureId不为空，表示更新，否则是新增
@@ -453,6 +459,14 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             PictureUploadRequest pictureUploadRequest = new PictureUploadRequest();
             if (StrUtil.isNotBlank(namePrefix)) {
                 pictureUploadRequest.setPicName(namePrefix + (uploadCount + 1));
+            }
+            String category = pictureUploadByBatchRequest.getCategory();
+            if (StrUtil.isNotBlank(category)) {
+                pictureUploadRequest.setCategory(category);
+            }
+            List<String> tags = pictureUploadByBatchRequest.getTags();
+            if (CollUtil.isNotEmpty(tags)) {
+                pictureUploadRequest.setTags(tags);
             }
             try {
                 PictureVO pictureVO = this.uploadPicture(fileUrl, pictureUploadRequest, loginUser);
