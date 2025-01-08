@@ -6,7 +6,7 @@
       :custom-request="handleUpload"
       :before-upload="beforeUpload"
     >
-      <img v-if="picture?.url" :src="picture?.url" alt="avatar" />
+      <img v-if="picture?.webpUrl" :src="picture?.webpUrl" alt="avatar" />
       <div v-else>
         <loading-outlined v-if="loading"></loading-outlined>
         <plus-outlined v-else></plus-outlined>
@@ -68,22 +68,97 @@ const beforeUpload = (file: UploadProps['fileList'][number]) => {
 }
 </script>
 <style scoped>
+.picture-upload {
+  position: relative;
+  margin: 20px 0;
+}
+
 .picture-upload :deep(.ant-upload) {
   width: 100% !important;
   height: 100% !important;
-  min-width: 152px;
-  min-height: 152px;
+  min-width: 200px;
+  min-height: 200px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px;
+  border: 2px dashed rgba(24, 144, 255, 0.3);
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.05), rgba(24, 144, 255, 0.02));
+  overflow: hidden;
 }
+
+.picture-upload :deep(.ant-upload:hover) {
+  border-color: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.15);
+}
+
 .picture-upload img {
   max-width: 100%;
   max-height: 480px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  object-fit: cover;
 }
+
+.picture-upload img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.ant-upload-select-picture-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(5px);
+}
+
 .ant-upload-select-picture-card i {
-  font-size: 32px;
-  color: #999;
+  font-size: 40px;
+  color: #40a9ff;
+  transition: all 0.3s;
+  margin-bottom: 12px;
+  animation: float 3s ease-in-out infinite;
 }
+
+.ant-upload-select-picture-card:hover i {
+  color: #1890ff;
+  transform: scale(1.1);
+}
+
 .ant-upload-select-picture-card .ant-upload-text {
-  margin-top: 8px;
+  margin-top: 16px;
   color: #666;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .picture-upload :deep(.ant-upload) {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .ant-upload-select-picture-card {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .ant-upload-select-picture-card .ant-upload-text {
+    color: rgba(255, 255, 255, 0.85);
+  }
 }
 </style>

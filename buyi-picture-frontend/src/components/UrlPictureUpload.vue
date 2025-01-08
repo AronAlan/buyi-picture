@@ -11,7 +11,7 @@
       </a-button>
     </a-input-group>
     <div class="img-wrapper">
-      <img v-if="picture?.url" :src="picture?.url" alt="avatar" />
+      <img v-if="picture?.webpUrl" :src="picture?.webpUrl" alt="avatar" />
     </div>
   </div>
 </template>
@@ -54,14 +54,35 @@ const handleUpload = async () => {
 </script>
 <style scoped>
 .url-picture-upload {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px dashed #d9d9d9;
+  transition: all 0.3s;
 }
+
+.url-picture-upload:hover {
+  border-color: #40a9ff;
+}
+
 .url-picture-upload img {
   max-width: 100%;
   max-height: 480px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s;
 }
+
+.url-picture-upload img:hover {
+  transform: scale(1.02);
+}
+
 .url-picture-upload .img-wrapper {
   text-align: center;
-  margin-top: 16px;
+  margin-top: 20px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
 }
 </style>
