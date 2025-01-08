@@ -157,6 +157,7 @@ declare namespace API {
     updateTime?: string
     url?: string
     userId?: number
+    webpUrl?: string
   }
 
   type PictureEditRequest = {

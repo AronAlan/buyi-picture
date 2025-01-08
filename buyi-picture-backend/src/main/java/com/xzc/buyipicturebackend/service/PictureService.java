@@ -105,7 +105,7 @@ public interface PictureService extends IService<Picture> {
      * 批量抓取和创建图片
      *
      * @param pictureUploadByBatchRequest 批量抓取图片请求
-     * @param loginUser 登录用户
+     * @param loginUser                   登录用户
      * @return 成功创建的图片数
      */
     Integer uploadPictureByBatch(
@@ -113,4 +113,18 @@ public interface PictureService extends IService<Picture> {
             User loginUser
     );
 
+    /**
+     * 从缓存中读取图片VOs
+     * 本地缓存-> redis缓存 -> 数据库
+     *
+     * @param pictureQueryRequest PictureQueryRequest
+     * @param request             HttpServletRequest
+     * @return Page<PictureVO>
+     */
+    Page<PictureVO> getDataFromCacheOrDb(PictureQueryRequest pictureQueryRequest, HttpServletRequest request);
+
+    /**
+     * 删除包含本地缓存和redis缓存在内的所有缓存内容
+     */
+    void deleteAllCache();
 }

@@ -8,7 +8,7 @@
         <router-view />
       </a-layout-content>
       <a-layout-footer class="footer">
-        <a href="https://github.com/AronAlan/Samoyer-Interview" target="_blank">
+        <a href="https://github.com/AronAlan/buyi-picture" target="_blank">
           Author: Samoyer
         </a>
       </a-layout-footer>

@@ -52,7 +52,7 @@
           <a-list-item class="picture-item">
             <a-card hoverable @click="doClickPicture(picture)" class="picture-card">
               <template #cover>
-                <img :alt="picture.name" :src="picture.url" class="picture-image" />
+                <img :alt="picture.name" :src="picture.webpUrl" class="picture-image" />
               </template>
               <a-card-meta :title="picture.name">
                 <template #description>

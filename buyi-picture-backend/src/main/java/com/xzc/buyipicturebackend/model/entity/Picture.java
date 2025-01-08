@@ -28,6 +28,11 @@ public class Picture implements Serializable {
     private String url;
 
     /**
+     * 图片压缩为webp地址
+     */
+    private String webpUrl;
+
+    /**
      * 图片名称
      */
     private String name;

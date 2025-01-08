@@ -11,9 +11,14 @@ import lombok.Data;
 public class UploadPictureResult {
 
     /**
-     * 图片地址
+     * 图片原图地址
      */
     private String url;
+
+    /**
+     * 图片压缩为webp地址
+     */
+    private String webpUrl;
 
     /**
      * 图片名称

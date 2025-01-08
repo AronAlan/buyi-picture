@@ -18,26 +18,43 @@
         />
       </a-col>
       <!-- 用户信息展示栏 -->
-      <a-col flex="120px">
+      <a-col flex="250px">
         <div class="user-login-status">
-          <div v-if="loginUserStore.loginUser.id">
-            <a-dropdown>
-              <a-space>
-                <a-avatar :src="loginUserStore.loginUser.userAvatar" />
-                {{ loginUserStore.loginUser.userName ?? '无名' }}
-              </a-space>
-              <template #overlay>
-                <a-menu>
-                  <a-menu-item @click="doLogout">
-                    <LogoutOutlined />
-                    退出登录
-                  </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown>
-          </div>
-          <div v-else>
-            <a-button type="primary" href="/user/login">登录</a-button>
+          <!-- 管理员的刷新缓存按钮 -->
+          <a-button
+            v-if="loginUserStore.loginUser.id && loginUserStore.loginUser.userRole === 'admin'"
+            type="primary"
+            size="small"
+            class="refresh-btn"
+            @click="refreshCache"
+          >
+            <template #icon>
+              <SyncOutlined />
+            </template>
+            刷新缓存
+          </a-button>
+
+          <!-- 用户信息/登录按钮 -->
+          <div class="user-info">
+            <div v-if="loginUserStore.loginUser.id">
+              <a-dropdown>
+                <a-space>
+                  <a-avatar :src="loginUserStore.loginUser.userAvatar" />
+                  {{ loginUserStore.loginUser.userName ?? '无名' }}
+                </a-space>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item @click="doLogout">
+                      <LogoutOutlined />
+                      退出登录
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </div>
+            <div v-else>
+              <a-button type="primary" href="/user/login">登录</a-button>
+            </div>
           </div>
         </div>
       </a-col>
@@ -47,12 +64,13 @@
 
 <script lang="ts" setup>
 import { computed, h, ref } from 'vue'
-import { HomeOutlined, LogoutOutlined } from '@ant-design/icons-vue'
+import { HomeOutlined, LogoutOutlined, SyncOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import type { MenuProps } from 'ant-design-vue'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import { userLogoutUsingPost } from '@/api/userController'
+import { refreshCacheUsingGet } from '@/api/pictureController'
 const loginUserStore = useLoginUserStore()
 // 未经过滤的菜单项
 const originItems = [
@@ -119,6 +137,21 @@ const doLogout = async () => {
     message.error('退出登录失败，' + res.data.message)
   }
 }
+// 在 setup 中添加刷新缓存的处理函数
+const refreshCache = async () => {
+  try {
+    const res = await refreshCacheUsingGet()
+    if (res.data.code === 0) {
+      message.success('缓存刷新成功')
+      // 刷新当前页面
+      window.location.reload()
+    } else {
+      message.error('缓存刷新失败：' + res.data.message)
+    }
+  } catch (error) {
+    message.error('缓存刷新失败')
+  }
+}
 </script>
 
 <style scoped>
@@ -133,5 +166,26 @@ const doLogout = async () => {
 }
 .logo {
   height: 48px;
+}
+.refresh-btn {
+  border-radius: 15px;
+  background: #1890ff;
+  font-size: 13px;
+  padding: 0 12px;
+  height: 28px;
+  line-height: 28px;
+}
+.refresh-btn:hover {
+  background: #40a9ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.25);
+}
+.user-login-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+.user-info {
+  margin-left: auto; /* 将用户信息推到右边 */
 }
 </style>

@@ -107,6 +107,14 @@ export async function listPictureVoByPageUsingPost(
   })
 }
 
+/** refreshCache GET /api/picture/refresh/cache */
+export async function refreshCacheUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseBoolean_>('/api/picture/refresh/cache', {
+    method: 'GET',
+    ...(options || {}),
+  })
+}
+
 /** doPictureReview POST /api/picture/review */
 export async function doPictureReviewUsingPost(
   body: API.PictureReviewRequest,

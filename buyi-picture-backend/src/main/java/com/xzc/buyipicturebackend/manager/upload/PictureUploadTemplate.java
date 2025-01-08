@@ -1,5 +1,6 @@
 package com.xzc.buyipicturebackend.manager.upload;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -7,8 +8,10 @@ import cn.hutool.core.util.RandomUtil;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
+import com.qcloud.cos.model.ciModel.persistence.CIObject;
 import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations;
+import com.qcloud.cos.model.ciModel.persistence.ProcessResults;
 import com.xzc.buyipicturebackend.config.CosClientConfig;
 import com.xzc.buyipicturebackend.exception.BusinessException;
 import com.xzc.buyipicturebackend.exception.ErrorCode;
@@ -18,7 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 图片上传模板类
@@ -64,11 +69,20 @@ public abstract class PictureUploadTemplate {
             //处理文件源，并转为File（MultipartFile转File，或从url直接下载）
             processFile(inputSource, file);
 
-            // 4.上传图片，获取图片信息
+            // 4.上传图片，获取图片信息（上传原图和压缩为webp的图片，一次性上传两张图片）
             PutObjectResult putObjectResult = putPictureObject(uploadPath, file);
             ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
+            // 压缩处理结果
+            ProcessResults processResults = putObjectResult.getCiUploadResult().getProcessResults();
+            List<CIObject> objectList = processResults.getObjectList();
+            if (CollUtil.isNotEmpty(objectList)) {
+                // 压缩处理成webp后的图片对象
+                CIObject compressedCiObject = objectList.get(0);
+                // 5.封装webp返回结果
+                return buildResult(originFilename, compressedCiObject, uploadPath, imageInfo, file);
+            }
 
-            // 5.封装返回结果
+            // 5.封装原图返回结果
             return buildResult(originFilename, file, uploadPath, imageInfo);
         } catch (Exception e) {
             log.error("图片上传到对象存储失败", e);
@@ -104,7 +118,7 @@ public abstract class PictureUploadTemplate {
     protected abstract void processFile(Object inputSource, File file) throws Exception;
 
     /**
-     * 封装返回结果
+     * 封装原图返回结果
      *
      * @param originFilename 源文件名
      * @param file           文件
@@ -123,6 +137,34 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setPicScale(picScale);
         uploadPictureResult.setPicFormat(imageInfo.getFormat());
         uploadPictureResult.setPicSize(FileUtil.size(file));
+        uploadPictureResult.setUrl(cosClientConfig.getHost() + "/" + uploadPath);
+        //没有生成压缩webp图，则使用原图
+        uploadPictureResult.setWebpUrl(cosClientConfig.getHost() + "/" + uploadPath);
+        return uploadPictureResult;
+    }
+
+    /**
+     * 封装webp返回结果
+     * 只增加：多上传了一个webp格式的图片；网页显示的是webp格式的，下载时是原图格式
+     * @param originFilename     源文件名
+     * @param compressedCiObject 压缩后的webp图
+     * @param uploadPath         原图片地址
+     * @return 图片解析返回结果
+     */
+    private UploadPictureResult buildResult(String originFilename, CIObject compressedCiObject
+            , String uploadPath, ImageInfo imageInfo, File file) {
+        UploadPictureResult uploadPictureResult = new UploadPictureResult();
+        int picWidth = compressedCiObject.getWidth();
+        int picHeight = compressedCiObject.getHeight();
+        double picScale = NumberUtil.round(picWidth * 1.0 / picHeight, 2).doubleValue();
+        uploadPictureResult.setPicName(FileUtil.mainName(originFilename));
+        uploadPictureResult.setPicWidth(picWidth);
+        uploadPictureResult.setPicHeight(picHeight);
+        uploadPictureResult.setPicScale(picScale);
+        // 这里设置图片的格式和大小属性还是原图的格式和大小
+        uploadPictureResult.setPicFormat(imageInfo.getFormat());
+        uploadPictureResult.setPicSize(FileUtil.size(file));
+        uploadPictureResult.setWebpUrl(cosClientConfig.getHost() + "/" + compressedCiObject.getKey());
         uploadPictureResult.setUrl(cosClientConfig.getHost() + "/" + uploadPath);
         return uploadPictureResult;
     }
@@ -143,6 +185,7 @@ public abstract class PictureUploadTemplate {
 
     /**
      * 上传对象（附带图片信息）并返回包含图片基本信息
+     * 包含上传原图和压缩为webp的图片，一次性上传两张图片
      *
      * @param key  唯一键
      * @param file 文件
@@ -152,9 +195,21 @@ public abstract class PictureUploadTemplate {
                 file);
         // 对图片进行处理（获取基本信息也被视作为一种处理）
         PicOperations picOperations = new PicOperations();
-        // 1 表示返回原图信息
+        // 1表示返回原图信息
         picOperations.setIsPicInfo(1);
+
+        List<PicOperations.Rule> rules = new ArrayList<>();
+
+        // 图片压缩（转成webp格式）
+        String webpKey = FileUtil.mainName(key) + ".webp";
+        PicOperations.Rule compressRule = new PicOperations.Rule();
+        compressRule.setRule("imageMogr2/format/webp");
+        compressRule.setBucket(cosClientConfig.getBucket());
+        compressRule.setFileId(webpKey);
+        rules.add(compressRule);
+
         // 构造处理参数
+        picOperations.setRules(rules);
         putObjectRequest.setPicOperations(picOperations);
         return cosClient.putObject(putObjectRequest);
     }
