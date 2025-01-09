@@ -78,8 +78,14 @@ public abstract class PictureUploadTemplate {
             if (CollUtil.isNotEmpty(objectList)) {
                 // 压缩处理成webp后的图片对象
                 CIObject compressedCiObject = objectList.get(0);
+                // 缩略图默认等于压缩图
+                CIObject thumbnailCiObject = compressedCiObject;
+                // 有生成缩略图，才得到缩略图
+                if (objectList.size() > 1) {
+                    thumbnailCiObject = objectList.get(1);
+                }
                 // 5.封装webp返回结果
-                return buildResult(originFilename, compressedCiObject, uploadPath, imageInfo, file);
+                return buildResult(originFilename, compressedCiObject, thumbnailCiObject, uploadPath, imageInfo, file);
             }
 
             // 5.封装原图返回结果
@@ -138,20 +144,23 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setPicFormat(imageInfo.getFormat());
         uploadPictureResult.setPicSize(FileUtil.size(file));
         uploadPictureResult.setUrl(cosClientConfig.getHost() + "/" + uploadPath);
-        //没有生成压缩webp图，则使用原图
+        // 没有生成压缩webp图，则使用原图
         uploadPictureResult.setWebpUrl(cosClientConfig.getHost() + "/" + uploadPath);
+        // 没有压缩webp图且没有生成缩略图，则使用原图
+        uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + uploadPath);
         return uploadPictureResult;
     }
 
     /**
      * 封装webp返回结果
      * 只增加：多上传了一个webp格式的图片；网页显示的是webp格式的，下载时是原图格式
+     *
      * @param originFilename     源文件名
      * @param compressedCiObject 压缩后的webp图
      * @param uploadPath         原图片地址
      * @return 图片解析返回结果
      */
-    private UploadPictureResult buildResult(String originFilename, CIObject compressedCiObject
+    private UploadPictureResult buildResult(String originFilename, CIObject compressedCiObject, CIObject thumbnailCiObject
             , String uploadPath, ImageInfo imageInfo, File file) {
         UploadPictureResult uploadPictureResult = new UploadPictureResult();
         int picWidth = compressedCiObject.getWidth();
@@ -164,8 +173,12 @@ public abstract class PictureUploadTemplate {
         // 这里设置图片的格式和大小属性还是原图的格式和大小
         uploadPictureResult.setPicFormat(imageInfo.getFormat());
         uploadPictureResult.setPicSize(FileUtil.size(file));
+        // 压缩webp图
         uploadPictureResult.setWebpUrl(cosClientConfig.getHost() + "/" + compressedCiObject.getKey());
+        // 原图
         uploadPictureResult.setUrl(cosClientConfig.getHost() + "/" + uploadPath);
+        // 缩略图（如果没有生成缩略图，thumbnailCiObject默认为压缩图compressedCiObject）
+        uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + thumbnailCiObject.getKey());
         return uploadPictureResult;
     }
 
@@ -208,6 +221,16 @@ public abstract class PictureUploadTemplate {
         compressRule.setFileId(webpKey);
         rules.add(compressRule);
 
+        // 缩略图处理。仅对超50KB的图片生成缩略图
+        if (file.length() > 50 * 1024) {
+            PicOperations.Rule thumbnailRule = new PicOperations.Rule();
+            thumbnailRule.setBucket(cosClientConfig.getBucket());
+            String thumbnailKey = FileUtil.mainName(key) + "_thumbnail." + FileUtil.getSuffix(key);
+            thumbnailRule.setFileId(thumbnailKey);
+            // 缩放规则 /thumbnail/<Width>x<Height>>（如果大于原图宽高，则不处理）
+            thumbnailRule.setRule(String.format("imageMogr2/thumbnail/%sx%s>", 512, 512));
+            rules.add(thumbnailRule);
+        }
         // 构造处理参数
         picOperations.setRules(rules);
         putObjectRequest.setPicOperations(picOperations);

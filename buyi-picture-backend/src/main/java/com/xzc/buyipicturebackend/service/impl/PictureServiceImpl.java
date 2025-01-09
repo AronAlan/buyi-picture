@@ -17,6 +17,7 @@ import com.xzc.buyipicturebackend.common.ResultUtils;
 import com.xzc.buyipicturebackend.exception.BusinessException;
 import com.xzc.buyipicturebackend.exception.ErrorCode;
 import com.xzc.buyipicturebackend.exception.ThrowUtils;
+import com.xzc.buyipicturebackend.manager.delete.DeleteManager;
 import com.xzc.buyipicturebackend.manager.download.DownloadManager;
 import com.xzc.buyipicturebackend.manager.upload.FilePictureUpload;
 import com.xzc.buyipicturebackend.manager.upload.PictureUploadTemplate;
@@ -38,6 +39,7 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,6 +48,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +81,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private DeleteManager deleteManager;
 
     /**
      * 上传图片（可重新上传）（重新上传时，暂为直接在云中多上传一张图片，旧图片保留了，暂未删除）
@@ -129,6 +136,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());
         picture.setWebpUrl(uploadPictureResult.getWebpUrl());
+        picture.setThumbnailUrl(uploadPictureResult.getThumbnailUrl());
         String picName = uploadPictureResult.getPicName();
         // 批量抓取图片时，使用管理员自定义的名称
         if (pictureUploadRequest != null && StrUtil.isNotBlank(pictureUploadRequest.getPicName())) {
@@ -560,6 +568,39 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Set<String> keys = stringRedisTemplate.keys(keyPattern);
         if (keys != null && !keys.isEmpty()) {
             stringRedisTemplate.delete(keys);
+        }
+    }
+
+    /**
+     * 删除图片在cos中的存储文件
+     * 异步执行
+     *
+     * @param oldPicture 图片
+     */
+    @Async
+    @Override
+    public void deletePictureFile(Picture oldPicture) {
+        String pictureUrl = oldPicture.getUrl();
+        String path = null;
+        try {
+            // 清理原图
+            path = new URI(pictureUrl).getPath();
+            deleteManager.deleteObject(path);
+            // 清理压缩webp图
+            String webpUrl = oldPicture.getWebpUrl();
+            if (StrUtil.isNotBlank(webpUrl) && !webpUrl.equals(pictureUrl)) {
+                path= new URI(webpUrl).getPath();
+                deleteManager.deleteObject(path);
+            }
+            // 清理缩略图
+            String thumbnailUrl = oldPicture.getThumbnailUrl();
+            if (StrUtil.isNotBlank(thumbnailUrl) && !thumbnailUrl.equals(pictureUrl)) {
+                path= new URI(thumbnailUrl).getPath();
+                deleteManager.deleteObject(path);
+            }
+        } catch (URISyntaxException e) {
+            log.error("处理图片删除时遇到格式错误的 URL。图片 URL: {}", pictureUrl, e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除时遇到格式错误的 URL");
         }
     }
 

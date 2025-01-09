@@ -124,9 +124,14 @@ public class PictureController {
         }
 
         //TODO 后续改为在用户的“我的”里，集中删除
+
         // 删除
         boolean result = pictureService.removeById(id);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除失败，数据库错误");
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除数据库记录失败，数据库错误");
+
+        pictureService.deletePictureFile(picture);
+        pictureService.deleteAllCache();
+        log.info("成功删除图片资源并清除缓存:{}", picture);
         return ResultUtils.success(true);
     }
 

@@ -127,4 +127,12 @@ public interface PictureService extends IService<Picture> {
      * 删除包含本地缓存和redis缓存在内的所有缓存内容
      */
     void deleteAllCache();
+
+    /**
+     * 删除图片在cos中的存储文件
+     * 异步执行
+     *
+     * @param oldPicture 图片
+     */
+    void deletePictureFile(Picture oldPicture);
 }

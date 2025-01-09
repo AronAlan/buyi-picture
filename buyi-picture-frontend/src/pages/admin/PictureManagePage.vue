@@ -57,8 +57,8 @@
       @change="doTableChange"
     >
       <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'webpUrl'">
-          <a-image :src="record.webpUrl" :width="120" />
+        <template v-if="column.dataIndex === 'thumbnailUrl'">
+          <a-image :src="record.thumbnailUrl" :width="120" />
         </template>
         <template v-if="column.dataIndex === 'tags'">
           <a-space wrap>
@@ -203,7 +203,7 @@ const columns = [
   },
   {
     title: '图片',
-    dataIndex: 'webpUrl',
+    dataIndex: 'thumbnailUrl',
     align: 'center',
     width: 200,
   },
