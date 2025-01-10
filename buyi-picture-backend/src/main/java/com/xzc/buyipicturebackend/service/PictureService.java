@@ -2,15 +2,11 @@ package com.xzc.buyipicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xzc.buyipicturebackend.model.dto.PictureQueryRequest;
-import com.xzc.buyipicturebackend.model.dto.PictureReviewRequest;
-import com.xzc.buyipicturebackend.model.dto.PictureUploadByBatchRequest;
-import com.xzc.buyipicturebackend.model.dto.PictureUploadRequest;
+import com.xzc.buyipicturebackend.model.dto.*;
 import com.xzc.buyipicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xzc.buyipicturebackend.model.entity.User;
-import com.xzc.buyipicturebackend.model.vo.PictureVO;
-import org.springframework.web.multipart.MultipartFile;
+import com.xzc.buyipicturebackend.model.vo.PictureVo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +30,7 @@ public interface PictureService extends IService<Picture> {
      * @param loginUser            登录用户
      * @return PictureVO（脱敏）
      */
-    PictureVO uploadPicture(Object inputSource,
+    PictureVo uploadPicture(Object inputSource,
                             PictureUploadRequest pictureUploadRequest,
                             User loginUser);
 
@@ -63,7 +59,7 @@ public interface PictureService extends IService<Picture> {
      * @param request HttpServletRequest
      * @return PictureVO
      */
-    PictureVO getPictureVO(Picture picture, HttpServletRequest request);
+    PictureVo getPictureVO(Picture picture, HttpServletRequest request);
 
     /**
      * 分页获取图片封装
@@ -73,7 +69,7 @@ public interface PictureService extends IService<Picture> {
      * @param request     HttpServletRequest
      * @return Page<PictureVO>
      */
-    Page<PictureVO> getPictureVoPage(Page<Picture> picturePage, HttpServletRequest request);
+    Page<PictureVo> getPictureVoPage(Page<Picture> picturePage, HttpServletRequest request);
 
     /**
      * 图片数据（id,url,简介）校验
@@ -121,12 +117,20 @@ public interface PictureService extends IService<Picture> {
      * @param request             HttpServletRequest
      * @return Page<PictureVO>
      */
-    Page<PictureVO> getDataFromCacheOrDb(PictureQueryRequest pictureQueryRequest, HttpServletRequest request);
+    Page<PictureVo> getDataFromCacheOrDb(PictureQueryRequest pictureQueryRequest, HttpServletRequest request);
 
     /**
      * 删除包含本地缓存和redis缓存在内的所有缓存内容
      */
     void deleteAllCache();
+
+    /**
+     * 删除图片
+     *
+     * @param pictureId 图片id
+     * @param loginUser User
+     */
+    void deletePicture(long pictureId, User loginUser);
 
     /**
      * 删除图片在cos中的存储文件
@@ -135,4 +139,24 @@ public interface PictureService extends IService<Picture> {
      * @param oldPicture 图片
      */
     void deletePictureFile(Picture oldPicture);
+
+    /**
+     * 删除图片校验权限
+     * 公共图库的图片，上传者和管理员能删除
+     * 私有空间的图片仅拥有者能够删除，管理员也不能私自删除
+     *
+     * @param loginUser User
+     * @param picture   Picture
+     */
+    void checkPictureAuth(User loginUser, Picture picture);
+
+    /**
+     * 编辑图片
+     * 公共图库的图片管理员和本人可编辑
+     * 私有图库的图片仅本人可编辑
+     *
+     * @param pictureEditRequest PictureEditRequest
+     * @param loginUser          User
+     */
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
 }

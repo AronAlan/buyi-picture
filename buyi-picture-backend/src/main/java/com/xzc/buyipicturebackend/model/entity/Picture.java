@@ -88,6 +88,11 @@ public class Picture implements Serializable {
     private Long userId;
 
     /**
+     * 空间 id（为空则为公共图库）
+     */
+    private Long spaceId;
+
+    /**
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

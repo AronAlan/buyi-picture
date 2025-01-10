@@ -16,7 +16,7 @@ import java.util.List;
  * @author xuzhichao
  */
 @Data
-public class PictureVO implements Serializable {
+public class PictureVo implements Serializable {
 
     /**
      * id
@@ -89,6 +89,11 @@ public class PictureVO implements Serializable {
     private Long userId;
 
     /**
+     * 空间 id（为空则为公共图库）
+     */
+    private Long spaceId;
+
+    /**
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -116,7 +121,7 @@ public class PictureVO implements Serializable {
     /**
      * 封装类转对象
      */
-    public static Picture voToObj(PictureVO pictureVO) {
+    public static Picture voToObj(PictureVo pictureVO) {
         if (pictureVO == null) {
             return null;
         }
@@ -130,11 +135,11 @@ public class PictureVO implements Serializable {
     /**
      * 对象转封装类
      */
-    public static PictureVO objToVo(Picture picture) {
+    public static PictureVo objToVo(Picture picture) {
         if (picture == null) {
             return null;
         }
-        PictureVO pictureVO = new PictureVO();
+        PictureVo pictureVO = new PictureVo();
         BeanUtils.copyProperties(picture, pictureVO);
         // 类型不同，需要转换  
         pictureVO.setTags(JSONUtil.toList(picture.getTags(), String.class));
