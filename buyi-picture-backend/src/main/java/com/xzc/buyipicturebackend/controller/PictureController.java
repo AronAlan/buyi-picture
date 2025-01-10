@@ -63,12 +63,13 @@ public class PictureController {
      * @return PictureVO（脱敏）
      */
     @PostMapping("/upload")
-    public BaseResponse<PictureVo> uploadPicture(@RequestPart("file") MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest,
-                                                 HttpServletRequest request) {
+    public BaseResponse<PictureVo> uploadPicture(@RequestPart("file") MultipartFile multipartFile
+            , PictureUploadRequest pictureUploadRequest
+            , HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
-        // 1.校验空间
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
-        // 校验空间是否存在
+
+        // 1.如果是上传到私有空间
         Long spaceId = pictureUploadRequest.getSpaceId();
         if (spaceId != null) {
             Space space = spaceService.getById(spaceId);

@@ -68,7 +68,7 @@ export async function getPictureVoByIdUsingGet(
   params: API.getPictureVoByIdUsingGETParams,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponsePictureVO_>('/api/picture/get/vo', {
+  return request<API.BaseResponsePictureVo_>('/api/picture/get/vo', {
     method: 'GET',
     params: {
       ...params,
@@ -97,7 +97,22 @@ export async function listPictureVoByPageUsingPost(
   body: API.PictureQueryRequest,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponsePagePictureVO_>('/api/picture/list/page/vo', {
+  return request<API.BaseResponsePagePictureVo_>('/api/picture/list/page/vo', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
+/** listSpacePictureVoByPage POST /api/picture/list/space/page/vo */
+export async function listSpacePictureVoByPageUsingPost(
+  body: API.PictureQueryRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponsePagePictureVo_>('/api/picture/list/space/page/vo', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -183,7 +198,7 @@ export async function uploadPictureUsingPost(
     }
   })
 
-  return request<API.BaseResponsePictureVO_>('/api/picture/upload', {
+  return request<API.BaseResponsePictureVo_>('/api/picture/upload', {
     method: 'POST',
     params: {
       ...params,
@@ -214,7 +229,7 @@ export async function uploadPictureByUrlUsingPost(
   body: API.PictureUploadRequest,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponsePictureVO_>('/api/picture/upload/url', {
+  return request<API.BaseResponsePictureVo_>('/api/picture/upload/url', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -106,6 +106,7 @@ public class SpaceController {
 
     /**
      * 分页获取空间列表（封装类）（用户）
+     * 用户进入“我的空间”时查询自己的私有空间，如果列表为0则去创建。最多1个
      *
      * @param spaceQueryRequest SpaceQueryRequest
      * @param request           HttpServletRequest
@@ -116,8 +117,6 @@ public class SpaceController {
             , HttpServletRequest request) {
         long current = spaceQueryRequest.getCurrent();
         long size = spaceQueryRequest.getPageSize();
-        // 限制爬虫
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         // 查询数据库
         Page<Space> spacePage = spaceService.page(new Page<>(current, size),
                 spaceService.getQueryWrapper(spaceQueryRequest));
@@ -128,7 +127,7 @@ public class SpaceController {
     /**
      * 根据 id 获取空间（仅管理员可用）
      *
-     * @param id      空间id
+     * @param id 空间id
      * @return Space
      */
     @GetMapping("/get")
@@ -155,6 +154,11 @@ public class SpaceController {
         // 查询数据库
         Space space = spaceService.getById(id);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR);
+
+        // 非本人查询
+        if (!userService.getLoginUser(request).getId().equals(space.getUserId())){
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"您无权限查看他人的私有图库空间");
+        }
         // 获取封装类
         return ResultUtils.success(spaceService.getSpaceVo(space, request));
     }

@@ -108,6 +108,12 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         ThrowUtils.throwIf(inputSource == null, ErrorCode.PARAMS_ERROR, "图片为空");
 
+        //判断是新增还是更新图片
+        Long pictureId = null;
+        if (pictureUploadRequest != null) {
+            pictureId = pictureUploadRequest.getId();
+        }
+
         Long spaceId = pictureUploadRequest.getSpaceId();
         if (spaceId != null) {
             Space space = spaceService.getById(spaceId);
@@ -125,11 +131,6 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             }
         }
 
-        //判断是新增还是更新图片
-        Long pictureId = null;
-        if (pictureUploadRequest != null) {
-            pictureId = pictureUploadRequest.getId();
-        }
         //如果是更新图片
         if (pictureId != null) {
             // 校验图片是否存在
@@ -199,6 +200,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         }
         if (pictureUploadRequest != null && CollUtil.isNotEmpty(pictureUploadRequest.getTags())) {
             picture.setTags(JSONUtil.toJsonStr(pictureUploadRequest.getTags()));
+        }
+        if (spaceId!=null){
+            picture.setSpaceId(spaceId);
         }
         // 补充审核参数（用户和管理员都可上传图片，用户上传改为待审核，管理员上传自动过审）
         fillReviewParams(picture, loginUser, false);
