@@ -80,7 +80,7 @@ import {
 } from '@/api/pictureController'
 import { useRoute, useRouter } from 'vue-router'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
-const picture = ref<API.PictureVO>()
+const picture = ref<API.PictureVo>()
 const pictureForm = reactive<API.PictureEditRequest>({})
 const uploadType = ref<'file' | 'url'>('file')
 const router = useRouter()
@@ -93,7 +93,7 @@ const spaceId = computed(() => {
  * 图片上传成功
  * @param newPicture
  */
-const onSuccess = (newPicture: API.PictureVO) => {
+const onSuccess = (newPicture: API.PictureVo) => {
   picture.value = newPicture
   pictureForm.name = newPicture.name
 }

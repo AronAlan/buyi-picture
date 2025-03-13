@@ -80,7 +80,7 @@ import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router' // 定义数据
 import ColorfulTag from '@/components/ColorfulTag.vue'
 // 定义数据
-const dataList = ref<API.PictureVO[]>([])
+const dataList = ref<API.PictureVo[]>([])
 const total = ref(0)
 const loading = ref(true)
 // 搜索条件
@@ -159,7 +159,7 @@ const getTagCategoryOptions = async () => {
 }
 const router = useRouter()
 // 跳转至图片详情页
-const doClickPicture = (picture: API.PictureVO) => {
+const doClickPicture = (picture: API.PictureVo) => {
   router.push({
     path: `/picture/${picture.id}`,
   })
@@ -169,10 +169,10 @@ onMounted(() => {
 })
 
 // 添加分类点击处理函数
-const handleCategoryClick = (category: string) => {
-  selectedCategory.value = category
-  doSearch()
-}
+// const handleCategoryClick = (category: string) => {
+//   selectedCategory.value = category
+//   doSearch()
+// }
 </script>
 
 <style scoped>

@@ -74,7 +74,7 @@ interface Props {
   id: string | number
 }
 const props = defineProps<Props>()
-const picture = ref<API.PictureVO>({})
+const picture = ref<API.PictureVo>({})
 const loginUserStore = useLoginUserStore()
 // 获取图片详情
 const fetchPictureDetail = async () => {
