@@ -1,13 +1,15 @@
 <template>
   <div id="pictureDetailPage">
-    <div style="text-align: left; margin-bottom: 16px;"> <!-- 修改为左对齐 -->
-      <h3 style="font-weight: bold; font-size: 1.5em;">图片详情</h3> <!-- 加粗并放大 -->
+    <div style="text-align: left; margin-bottom: 16px">
+      <!-- 修改为左对齐 -->
+      <h3 style="font-weight: bold; font-size: 1.5em">图片详情</h3>
+      <!-- 加粗并放大 -->
     </div>
     <a-row :gutter="[16, 16]">
       <!-- 图片预览 -->
       <a-col :sm="24" :md="16" :xl="18">
-        <a-card style="display: flex; justify-content: center;">
-          <a-image :src="picture.webpUrl" style="max-height: 600px; object-fit: contain;" />
+        <a-card style="display: flex; justify-content: center">
+          <a-image :src="picture.webpUrl" style="max-height: 600px; object-fit: contain" />
         </a-card>
       </a-col>
       <!-- 图片信息区域 -->
@@ -47,6 +49,19 @@
             <a-descriptions-item label="大小">
               {{ formatSize(picture.picSize) }}
             </a-descriptions-item>
+            <a-descriptions-item label="主色调">
+              <a-space>
+                {{ picture.picColor ?? '-' }}
+                <div
+                  v-if="picture.picColor"
+                  :style="{
+                    backgroundColor: toHexColor(picture.picColor),
+                    width: '16px',
+                    height: '16px',
+                  }"
+                />
+              </a-space>
+            </a-descriptions-item>
           </a-descriptions>
           <!-- 图片操作 -->
           <a-space wrap>
@@ -56,20 +71,27 @@
                 <DownloadOutlined />
               </template>
             </a-button>
+            <a-button :icon="h(ShareAltOutlined)" type="primary" ghost @click="doShare">
+              分享
+            </a-button>
           </a-space>
         </a-card>
       </a-col>
     </a-row>
+    <ShareModal ref="shareModalRef" :link="shareLink" />
   </div>
 </template>
+
 <script setup lang="ts">
 import { h, onMounted, ref } from 'vue'
 import { getPictureVoByIdUsingGet } from '@/api/pictureController'
 import { message } from 'ant-design-vue'
-import { DownloadOutlined } from '@ant-design/icons-vue'
+import { DownloadOutlined, ShareAltOutlined } from '@ant-design/icons-vue'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
-import { downloadImage, formatSize } from '@/utils'
+import { downloadImage, formatSize, toHexColor } from '@/utils'
+import ShareModal from '@/components/ShareModal.vue'
 import ColorfulTag from '@/components/ColorfulTag.vue'
+
 interface Props {
   id: string | number
 }
@@ -97,6 +119,18 @@ onMounted(() => {
 // 下载图片
 const doDownload = () => {
   downloadImage(picture.value.url)
+}
+
+// ----- 分享操作 ----
+const shareModalRef = ref()
+// 分享链接
+const shareLink = ref<string>()
+// 分享
+const doShare = () => {
+  shareLink.value = `${window.location.protocol}//${window.location.host}/picture/${picture.value.id}`
+  if (shareModalRef.value) {
+    shareModalRef.value.openModal()
+  }
 }
 </script>
 <style scoped>

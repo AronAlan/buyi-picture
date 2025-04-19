@@ -10,10 +10,10 @@
         />
       </a-form-item>
       <a-form-item name="category" label="分类">
-        <a-auto-complete
+        <a-select
           v-model:value="searchParams.category"
           style="min-width: 180px"
-          placeholder="请输入分类"
+          placeholder="请选择分类"
           :options="categoryOptions"
           allow-clear
         />
@@ -22,8 +22,8 @@
         <a-select
           v-model:value="searchParams.tags"
           style="min-width: 180px"
-          mode="tags"
-          placeholder="请输入标签"
+          mode="multiple"
+          placeholder="请选择标签"
           :options="tagOptions"
           allow-clear
         />
@@ -52,7 +52,13 @@
         <a-input-number v-model:value="searchParams.picHeight" />
       </a-form-item>
       <a-form-item label="格式" name="picFormat">
-        <a-input v-model:value="searchParams.picFormat" placeholder="请输入格式" allow-clear />
+        <a-select
+          v-model:value="searchParams.picFormat"
+          style="min-width: 120px"
+          placeholder="请选择格式"
+          :options="formatOptions"
+          allow-clear
+        />
       </a-form-item>
       <a-form-item>
         <a-space>
@@ -94,18 +100,14 @@ const tagOptions = ref<string[]>([])
 const getTagCategoryOptions = async () => {
   const res = await listPictureTagCategoryUsingGet()
   if (res.data.code === 0 && res.data.data) {
-    tagOptions.value = (res.data.data.tagList ?? []).map((data: string) => {
-      return {
-        value: data,
-        label: data,
-      }
-    })
-    categoryOptions.value = (res.data.data.categoryList ?? []).map((data: string) => {
-      return {
-        value: data,
-        label: data,
-      }
-    })
+    tagOptions.value = (res.data.data.tagList ?? []).map((data: string) => ({
+      value: data,
+      label: data,
+    }))
+    categoryOptions.value = (res.data.data.categoryList ?? []).map((data: string) => ({
+      value: data,
+      label: data,
+    }))
   } else {
     message.error('获取标签分类列表失败，' + res.data.message)
   }
@@ -151,6 +153,13 @@ const doClear = () => {
   // 清空后重新搜索
   props.onSearch?.(searchParams)
 }
+
+// 添加格式选项
+const formatOptions = ref([
+  { value: 'JPEG', label: 'JPEG' },
+  { value: 'JPG', label: 'JPG' },
+  { value: 'PNG', label: 'PNG' },
+])
 </script>
 
 <style scoped>

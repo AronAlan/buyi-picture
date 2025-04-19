@@ -94,6 +94,11 @@ public class PictureVo implements Serializable {
     private Long spaceId;
 
     /**
+     * 图片主色调
+     */
+    private String picColor;
+
+    /**
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

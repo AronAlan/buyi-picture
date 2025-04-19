@@ -32,6 +32,7 @@ import com.xzc.buyipicturebackend.model.vo.UserVo;
 import com.xzc.buyipicturebackend.service.PictureService;
 import com.xzc.buyipicturebackend.service.SpaceService;
 import com.xzc.buyipicturebackend.service.UserService;
+import com.xzc.buyipicturebackend.utils.ColorSimilarUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -48,13 +49,12 @@ import org.springframework.util.DigestUtils;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -194,6 +194,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         picture.setPicHeight(uploadPictureResult.getPicHeight());
         picture.setPicScale(uploadPictureResult.getPicScale());
         picture.setPicFormat(uploadPictureResult.getPicFormat());
+        picture.setPicColor(uploadPictureResult.getPicColor());
         picture.setUserId(loginUser.getId());
         if (pictureUploadRequest != null && StrUtil.isNotBlank(pictureUploadRequest.getCategory())) {
             picture.setCategory(pictureUploadRequest.getCategory());
@@ -201,7 +202,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         if (pictureUploadRequest != null && CollUtil.isNotEmpty(pictureUploadRequest.getTags())) {
             picture.setTags(JSONUtil.toJsonStr(pictureUploadRequest.getTags()));
         }
-        if (spaceId!=null){
+        if (spaceId != null) {
             picture.setSpaceId(spaceId);
         }
         // 补充审核参数（用户和管理员都可上传图片，用户上传改为待审核，管理员上传自动过审）
@@ -774,6 +775,61 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         }
     }
 
+    /**
+     * 个人空间下根据主色调搜索图片
+     *
+     * @param spaceId 空间id
+     * @param picColor 色调（十六进制）
+     * @param loginUser 用户
+     * @return List<PictureVo>
+     */
+    @Override
+    public List<PictureVo> searchPictureByColor(Long spaceId, String picColor, User loginUser) {
+        // 校验参数
+        ThrowUtils.throwIf(spaceId==null||StrUtil.isBlank(picColor),ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(loginUser==null,ErrorCode.NO_AUTH_ERROR);
+        // 校验空间权限
+        Space space = spaceService.getById(spaceId);
+        ThrowUtils.throwIf(space==null,ErrorCode.NOT_FOUND_ERROR,"空间不存在");
+        if (!loginUser.getId().equals(space.getUserId())){
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"没有空间访问权限");
+        }
+
+        // 查询空间下所有图片（包含主色调的）
+        List<Picture> pictureList = this.lambdaQuery()
+                .eq(Picture::getSpaceId, spaceId)
+                .isNotNull(Picture::getPicColor)
+                .list();
+        // 没有查到，就直接返回空列表
+        if (CollUtil.isEmpty(pictureList)){
+            return Collections.emptyList();
+        }
+
+        // 把要查询的目标颜色转为Color对象
+        Color targetColor = Color.decode(picColor);
+        // 计算相似度，并排序
+        List<Picture> sortedPictures = pictureList.stream()
+                .sorted(
+                        Comparator.comparingDouble(picture->{
+                            //提取图片主色调
+                            String hexColor = picture.getPicColor();
+                            //没有主色调的图片放到最后
+                            if (StrUtil.isBlank(hexColor)){
+                                return Double.MAX_VALUE;
+                            }
+                            Color pictureColor = Color.decode(hexColor);
+                            // 计算出的相似度越大越相似。返回负值，则return越小排序越靠前
+                            return -ColorSimilarUtils.calculateSimilarity(targetColor,pictureColor);
+                        })
+                )
+                //取前12个
+                .limit(12)
+                .collect(Collectors.toList());
+
+        return sortedPictures.stream()
+                .map(PictureVo::objToVo)
+                .collect(Collectors.toList());
+    }
 
 }
 

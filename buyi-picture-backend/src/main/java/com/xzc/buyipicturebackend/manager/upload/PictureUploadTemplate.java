@@ -148,6 +148,8 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setWebpUrl(cosClientConfig.getHost() + "/" + uploadPath);
         // 没有压缩webp图且没有生成缩略图，则使用原图
         uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + uploadPath);
+        // 设置图片主色调
+        uploadPictureResult.setPicColor(imageInfo.getAve());
         return uploadPictureResult;
     }
 
@@ -179,6 +181,8 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setUrl(cosClientConfig.getHost() + "/" + uploadPath);
         // 缩略图（如果没有生成缩略图，thumbnailCiObject默认为压缩图compressedCiObject）
         uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + thumbnailCiObject.getKey());
+        // 设置图片主色调
+        uploadPictureResult.setPicColor(imageInfo.getAve());
         return uploadPictureResult;
     }
 

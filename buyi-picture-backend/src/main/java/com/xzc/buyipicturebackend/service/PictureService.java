@@ -11,6 +11,7 @@ import com.xzc.buyipicturebackend.model.vo.PictureVo;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author xuzhichao
@@ -159,4 +160,14 @@ public interface PictureService extends IService<Picture> {
      * @param loginUser          User
      */
     void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+
+    /**
+     * 个人空间下根据主色调搜索图片
+     *
+     * @param spaceId 空间id
+     * @param picColor 色调（十六进制）
+     * @param loginUser 用户
+     * @return List<PictureVo>
+     */
+    List<PictureVo> searchPictureByColor(Long spaceId, String picColor, User loginUser);
 }

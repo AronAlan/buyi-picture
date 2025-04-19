@@ -3,6 +3,8 @@ package com.xzc.buyipicturebackend.controller;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xzc.buyipicturebackend.annotation.AuthCheck;
+import com.xzc.buyipicturebackend.api.imagesearch.ImageSearchApiFacade;
+import com.xzc.buyipicturebackend.api.imagesearch.model.ImageSearchResult;
 import com.xzc.buyipicturebackend.common.BaseResponse;
 import com.xzc.buyipicturebackend.common.ResultUtils;
 import com.xzc.buyipicturebackend.constant.UserConstant;
@@ -28,6 +30,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -364,5 +367,49 @@ public class PictureController {
         return ResultUtils.success(true);
     }
 
+    /**
+     * 以图搜图
+     *
+     * @param searchPictureByPictureRequest 图片id请求
+     * @return true
+     */
+    @PostMapping("/search/picture")
+    public BaseResponse<List<ImageSearchResult>> searchPictureByPicture(@RequestBody SearchPictureByPictureRequest searchPictureByPictureRequest) {
+        ThrowUtils.throwIf(searchPictureByPictureRequest == null, ErrorCode.PARAMS_ERROR);
+        Long pictureId = searchPictureByPictureRequest.getPictureId();
+        ThrowUtils.throwIf(pictureId == null || pictureId <= 0, ErrorCode.PARAMS_ERROR);
+        Picture picture = pictureService.getById(pictureId);
+        ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
+
+        List<ImageSearchResult> resultList = new ArrayList<>();
+        //360搜图以start控制查询页数。本平台支持查询50条
+        int start = 0;
+        while (resultList.size() <= 50) {
+            List<ImageSearchResult> result = ImageSearchApiFacade.searchImages(picture.getUrl(), start);
+            if (result.isEmpty()) {
+                break;
+            }
+            resultList.addAll(result);
+            start += result.size();
+        }
+        return ResultUtils.success(resultList);
+    }
+
+    /**
+     * 以色调搜图
+     *
+     * @param searchPictureByColorRequest 以色调搜图请求（色调，空间id）
+     * @return true
+     */
+    @PostMapping("/search/color")
+    public BaseResponse<List<PictureVo>> searchPictureByColor(@RequestBody SearchPictureByColorRequest searchPictureByColorRequest
+            , HttpServletRequest request) {
+        ThrowUtils.throwIf(searchPictureByColorRequest == null, ErrorCode.PARAMS_ERROR);
+        String picColor = searchPictureByColorRequest.getPicColor();
+        Long spaceId = searchPictureByColorRequest.getSpaceId();
+        User loginUser = userService.getLoginUser(request);
+        List<PictureVo> pictureVos = pictureService.searchPictureByColor(spaceId, picColor, loginUser);
+        return ResultUtils.success(pictureVos);
+    }
 
 }
