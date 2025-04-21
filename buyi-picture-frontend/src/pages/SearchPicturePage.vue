@@ -52,7 +52,7 @@ const route = useRoute()
 const pictureId = computed(() => {
   return route.query?.pictureId
 })
-const picture = ref<API.PictureVO>({})
+const picture = ref<API.PictureVo>({})
 
 // 获取图片详情
 const fetchPictureDetail = async () => {

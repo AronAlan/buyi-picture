@@ -371,7 +371,7 @@ public class PictureController {
      * 以图搜图
      *
      * @param searchPictureByPictureRequest 图片id请求
-     * @return true
+     * @return List<ImageSearchResult>
      */
     @PostMapping("/search/picture")
     public BaseResponse<List<ImageSearchResult>> searchPictureByPicture(@RequestBody SearchPictureByPictureRequest searchPictureByPictureRequest) {
@@ -399,7 +399,7 @@ public class PictureController {
      * 以色调搜图
      *
      * @param searchPictureByColorRequest 以色调搜图请求（色调，空间id）
-     * @return true
+     * @return List<PictureVo>
      */
     @PostMapping("/search/color")
     public BaseResponse<List<PictureVo>> searchPictureByColor(@RequestBody SearchPictureByColorRequest searchPictureByColorRequest
@@ -410,6 +410,21 @@ public class PictureController {
         User loginUser = userService.getLoginUser(request);
         List<PictureVo> pictureVos = pictureService.searchPictureByColor(spaceId, picColor, loginUser);
         return ResultUtils.success(pictureVos);
+    }
+
+    /**
+     * 批量编辑图片（分类或标签或名称）
+     *
+     * @param pictureEditByBatchRequest 批量编辑图片请求
+     * @return true
+     */
+    @PostMapping("/edit/batch")
+    public BaseResponse<Boolean> editPictureByBatch(@RequestBody PictureEditByBatchRequest pictureEditByBatchRequest
+            , HttpServletRequest request) {
+        ThrowUtils.throwIf(pictureEditByBatchRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        pictureService.editPictureByBatch(pictureEditByBatchRequest, loginUser);
+        return ResultUtils.success(true);
     }
 
 }

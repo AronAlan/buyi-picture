@@ -75,7 +75,7 @@ import ShareModal from '@/components/ShareModal.vue'
 import { ref } from 'vue'
 
 interface Props {
-  dataList?: API.PictureVO[]
+  dataList?: API.PictureVo[]
   loading?: boolean
   showOp?: boolean
   onReload?: () => void
@@ -87,7 +87,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 const router = useRouter()
 // 跳转至图片详情页
-const doClickPicture = (picture: API.PictureVO) => {
+const doClickPicture = (picture: API.PictureVo) => {
   router.push({
     path: `/picture/${picture.id}`,
   })

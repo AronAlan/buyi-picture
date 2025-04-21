@@ -22,9 +22,9 @@ import type { UploadProps } from 'ant-design-vue'
 import { message } from 'ant-design-vue'
 import { uploadPictureUsingPost } from '@/api/pictureController'
 interface Props {
-  picture?: API.PictureVO
+  picture?: API.PictureVo
   spaceId?: number
-  onSuccess?: (newPicture: API.PictureVO) => void
+  onSuccess?: (newPicture: API.PictureVo) => void
 }
 const props = defineProps<Props>()
 /**

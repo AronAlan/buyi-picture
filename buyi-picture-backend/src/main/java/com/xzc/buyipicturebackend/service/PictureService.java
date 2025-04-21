@@ -164,10 +164,18 @@ public interface PictureService extends IService<Picture> {
     /**
      * 个人空间下根据主色调搜索图片
      *
-     * @param spaceId 空间id
-     * @param picColor 色调（十六进制）
+     * @param spaceId   空间id
+     * @param picColor  色调（十六进制）
      * @param loginUser 用户
      * @return List<PictureVo>
      */
     List<PictureVo> searchPictureByColor(Long spaceId, String picColor, User loginUser);
+
+    /**
+     * 批量修改图片分类或标签或名称
+     *
+     * @param pictureEditByBatchRequest pictureEditByBatchRequest
+     * @param loginUser                 用户
+     */
+    void editPictureByBatch(PictureEditByBatchRequest pictureEditByBatchRequest, User loginUser);
 }

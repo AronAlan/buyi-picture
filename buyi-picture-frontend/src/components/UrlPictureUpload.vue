@@ -20,9 +20,9 @@ import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 import { uploadPictureByUrlUsingPost } from '@/api/pictureController.ts'
 interface Props {
-  picture?: API.PictureVO
+  picture?: API.PictureVo
   spaceId?: number
-  onSuccess?: (newPicture: API.PictureVO) => void
+  onSuccess?: (newPicture: API.PictureVo) => void
 }
 const props = defineProps<Props>()
 const fileUrl = ref<string>()
