@@ -18,6 +18,22 @@
             <UrlPictureUpload :picture="picture" :spaceId="spaceId" :onSuccess="onSuccess" />
           </a-tab-pane>
         </a-tabs>
+
+        <!-- 添加编辑图片按钮 -->
+        <div v-if="picture" class="edit-picture-btn-container">
+          <a-button type="primary" @click="doEditPicture" class="edit-picture-btn">
+            <template #icon><EditOutlined /></template>
+            编辑图片
+          </a-button>
+          <!-- 图片裁剪组件 -->
+          <ImageCropper
+            ref="imageCropperRef"
+            :imageUrl="picture?.url"
+            :picture="picture"
+            :spaceId="spaceId"
+            :onSuccess="onCropSuccess"
+          />
+        </div>
       </div>
 
       <!-- 右侧表单区域 -->
@@ -69,6 +85,7 @@
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
 import PictureUpload from '@/components/PictureUpload.vue'
 import { computed, onMounted, reactive, ref } from 'vue'
@@ -78,8 +95,11 @@ import {
   getPictureVoByIdUsingGet,
   listPictureTagCategoryUsingGet,
 } from '@/api/pictureController'
+import ImageCropper from '@/components/ImageCropper.vue'
 import { useRoute, useRouter } from 'vue-router'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
+import { EditOutlined } from '@ant-design/icons-vue'
+
 const picture = ref<API.PictureVo>()
 const pictureForm = reactive<API.PictureEditRequest>({})
 const uploadType = ref<'file' | 'url'>('file')
@@ -173,7 +193,23 @@ const getOldPicture = async () => {
 onMounted(() => {
   getOldPicture()
 })
+
+// 图片编辑弹窗引用
+const imageCropperRef = ref()
+
+// 编辑图片
+const doEditPicture = () => {
+  if (imageCropperRef.value) {
+    imageCropperRef.value.openModal()
+  }
+}
+
+// 编辑成功事件
+const onCropSuccess = (newPicture: API.PictureVo) => {
+  picture.value = newPicture
+}
 </script>
+
 <style scoped>
 .add-picture-container {
   max-width: 1200px;
@@ -412,5 +448,29 @@ onMounted(() => {
     position: sticky;
     top: 24px;
   }
+}
+.edit-picture-btn-container {
+  margin-top: 20px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.edit-picture-btn {
+  padding: 8px 16px;
+  font-size: 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #40a9ff, #1890ff);
+  border: none;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-picture-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.25);
 }
 </style>

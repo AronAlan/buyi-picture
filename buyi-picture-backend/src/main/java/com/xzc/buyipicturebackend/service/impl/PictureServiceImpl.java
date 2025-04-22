@@ -164,6 +164,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                     throw new BusinessException(ErrorCode.PARAMS_ERROR, "空间 id 不一致");
                 }
             }
+            //更新图片时删除原图片
+            // 删COS资源文件
+            deletePictureFile(oldPicture);
         }
 
         // 按照用户 id 划分目录 => 按照空间划分目录
@@ -472,6 +475,12 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
      */
     @Override
     public void fillReviewParams(Picture picture, User loginUser, Boolean isEdit) {
+        if (picture.getSpaceId()!=null){
+            picture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
+            picture.setReviewerId(loginUser.getId());
+            picture.setReviewMessage("私人空间上传或更新，自动过审");
+            return;
+        }
         if (userService.isAdmin(loginUser)) {
             //如果是管理员上传的图片，则自动过审
             picture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
@@ -664,8 +673,6 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 校验权限：公共图库的图片仅本人或管理员可删除；私有图库的图片仅本人可删除
         checkPictureAuth(loginUser, picture);
 
-        //TODO 后续改为在用户的“我的”里，集中删除
-
         // 开启事务，更新数据库并释放空间额度
         transactionTemplate.execute(status -> {
             // 操作数据库
@@ -746,11 +753,13 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Picture oldPicture = getById(id);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
 
-        // TODO 后续改为在用户的“我的”里，集中编辑
         // 公共图库的图片本人或管理员可编辑；私有图库的图片仅本人可编辑
         checkPictureAuth(loginUser, oldPicture);
 
         // 补充审核参数
+        if (oldPicture.getSpaceId()!=null){
+            picture.setSpaceId(oldPicture.getSpaceId());
+        }
         fillReviewParams(picture, loginUser, true);
 
         // 操作数据库

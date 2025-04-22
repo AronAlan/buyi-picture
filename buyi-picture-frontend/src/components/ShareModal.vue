@@ -20,8 +20,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: "分享图片",
-  link: 'https://www.codefather.cn'
+  title: "分享图片"
 })
 
 // 是否可见
