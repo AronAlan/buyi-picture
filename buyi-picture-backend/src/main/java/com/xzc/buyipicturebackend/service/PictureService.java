@@ -2,6 +2,9 @@ package com.xzc.buyipicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xzc.buyipicturebackend.api.aliyun.model.CreateOutPaintingTaskRequest;
+import com.xzc.buyipicturebackend.api.aliyun.model.CreateOutPaintingTaskResponse;
+import com.xzc.buyipicturebackend.api.aliyun.model.CreatePictureOutPaintingTaskRequest;
 import com.xzc.buyipicturebackend.model.dto.*;
 import com.xzc.buyipicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -178,4 +181,13 @@ public interface PictureService extends IService<Picture> {
      * @param loginUser                 用户
      */
     void editPictureByBatch(PictureEditByBatchRequest pictureEditByBatchRequest, User loginUser);
+
+    /**
+     * 创建AI扩图任务
+     *
+     * @param createPictureOutPaintingTaskRequest 创建任务请求
+     * @param loginUer                            用户
+     * @return 请求响应
+     */
+    CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest, User loginUer);
 }

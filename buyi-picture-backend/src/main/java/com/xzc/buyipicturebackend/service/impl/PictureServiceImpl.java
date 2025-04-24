@@ -13,6 +13,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.qcloud.cos.model.COSObject;
 import com.qcloud.cos.model.COSObjectInputStream;
 import com.qcloud.cos.utils.IOUtils;
+import com.xzc.buyipicturebackend.api.aliyun.AliyunAiApi;
+import com.xzc.buyipicturebackend.api.aliyun.model.CreateOutPaintingTaskRequest;
+import com.xzc.buyipicturebackend.api.aliyun.model.CreateOutPaintingTaskResponse;
+import com.xzc.buyipicturebackend.api.aliyun.model.CreatePictureOutPaintingTaskRequest;
 import com.xzc.buyipicturebackend.exception.BusinessException;
 import com.xzc.buyipicturebackend.exception.ErrorCode;
 import com.xzc.buyipicturebackend.exception.ThrowUtils;
@@ -97,6 +101,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
     @Resource
     private ThreadPoolExecutor customExecutor;
+
+    @Resource
+    private AliyunAiApi aliyunAiApi;
 
     /**
      * 上传图片（可重新上传）（重新上传时，暂为直接在云中多上传一张图片，旧图片保留了，暂未删除）
@@ -475,7 +482,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
      */
     @Override
     public void fillReviewParams(Picture picture, User loginUser, Boolean isEdit) {
-        if (picture.getSpaceId()!=null){
+        if (picture.getSpaceId() != null) {
             picture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
             picture.setReviewerId(loginUser.getId());
             picture.setReviewMessage("私人空间上传或更新，自动过审");
@@ -757,7 +764,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         checkPictureAuth(loginUser, oldPicture);
 
         // 补充审核参数
-        if (oldPicture.getSpaceId()!=null){
+        if (oldPicture.getSpaceId() != null) {
             picture.setSpaceId(oldPicture.getSpaceId());
         }
         fillReviewParams(picture, loginUser, true);
@@ -768,7 +775,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     }
 
     /**
-     * 删除图片
+     * 校验登录用户对当前图片的权限
      * 公共图库的图片，上传者和管理员能删除
      * 私有空间的图片仅拥有者能够删除，管理员也不能私自删除
      *
@@ -877,7 +884,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
         // 修改图片名称
         String nameRule = pictureEditByBatchRequest.getNameRule();
-        fillPictureWithNameRule(pictureList,nameRule);
+        fillPictureWithNameRule(pictureList, nameRule);
 
         // 线程池分批并发处理
         String category = pictureEditByBatchRequest.getCategory();
@@ -918,22 +925,49 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
      * @param nameRule    格式：图片名称前缀
      */
     private void fillPictureWithNameRule(List<Picture> pictureList, String nameRule) {
-        if (CollUtil.isEmpty(pictureList)||StrUtil.isBlank(nameRule)){
+        if (CollUtil.isEmpty(pictureList) || StrUtil.isBlank(nameRule)) {
             return;
         }
-        long count=1;
+        long count = 1;
         try {
             for (Picture picture : pictureList) {
                 //拼接字符串
                 String pictureName = String.format("%s %s", nameRule, String.valueOf(count++));
                 picture.setName(pictureName);
             }
-        }catch (Exception e){
-            log.error("名称填充失败",e);
-            throw new BusinessException(ErrorCode.OPERATION_ERROR,"名称填充失败");
+        } catch (Exception e) {
+            log.error("名称填充失败", e);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "名称填充失败");
         }
     }
 
+    /**
+     * 创建AI扩图任务
+     *
+     * @param createPictureOutPaintingTaskRequest 创建任务请求
+     * @return 请求响应
+     */
+    @Override
+    public CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest
+            , User loginUer) {
+        // 获取图片信息
+        Long pictureId = createPictureOutPaintingTaskRequest.getPictureId();
+        Picture picture = Optional.ofNullable(this.getById(pictureId))
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "图片不存在"));
+
+        // 权限校验
+        checkPictureAuth(loginUer, picture);
+
+        // 构造创建扩图任务的请求
+        CreateOutPaintingTaskRequest taskRequest = new CreateOutPaintingTaskRequest();
+        CreateOutPaintingTaskRequest.Input input = new CreateOutPaintingTaskRequest.Input();
+        input.setImageUrl(picture.getUrl());
+        taskRequest.setInput(input);
+        BeanUtils.copyProperties(createPictureOutPaintingTaskRequest, taskRequest);
+
+        // 创建任务
+        return aliyunAiApi.createOutPaintingTask(taskRequest);
+    }
 }
 
 

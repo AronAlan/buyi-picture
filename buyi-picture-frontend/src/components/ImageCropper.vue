@@ -5,6 +5,8 @@
     title="编辑图片"
     :footer="false"
     @cancel="closeModal"
+    :width="1000"
+    centered
   >
     <!-- 图片裁切组件 -->
     <vue-cropper
@@ -16,6 +18,7 @@
       :canMoveBox="true"
       :info="true"
       outputType="png"
+      :full="true"
     />
     <div style="margin-bottom: 16px" />
     <!-- 图片操作 -->
@@ -30,6 +33,22 @@
     </div>
   </a-modal>
 </template>
+
+<style scoped>
+.image-cropper {
+  text-align: center;
+}
+
+.image-cropper .vue-cropper {
+  width: 900px;
+  height: 700px;
+  margin: 0 auto;
+}
+
+.image-cropper-actions {
+  margin-top: 10px;
+}
+</style>
 
 <script lang="ts" setup>
 import { computed, onUnmounted, ref } from 'vue'
@@ -93,7 +112,7 @@ const handleUpload = async ({ file }: any) => {
       message.success('图片上传成功')
       // 将上传成功的图片信息传递给父组件
       props.onSuccess?.(res.data.data)
-      closeModal();
+      closeModal()
     } else {
       message.error('图片上传失败，' + res.data.message)
     }
@@ -122,13 +141,3 @@ defineExpose({
   openModal,
 })
 </script>
-
-<style scoped>
-.image-cropper {
-  text-align: center;
-}
-
-.image-cropper .vue-cropper {
-  height: 400px;
-}
-</style>

@@ -57,6 +57,10 @@ public abstract class PictureUploadTemplate {
 
         // 获取文件名
         String originFilename = getOriginFilename(inputSource);
+        // AI扩图时，源文件名后可能会拼接很多不需要的属性。去除问号及其后面的部分
+        if (originFilename != null && originFilename.contains("?")) {
+            originFilename = originFilename.substring(0, originFilename.indexOf("?"));
+        }
 
         String uploadFilename = String.format("%s_%s.%s", DateUtil.formatDate(new Date()), uuid,
                 FileUtil.getSuffix(originFilename));

@@ -19,11 +19,21 @@
           </a-tab-pane>
         </a-tabs>
 
+        <!-- 添加提示信息 -->
+        <div class="upload-tip">
+          提示：移动设备所拍摄的图片在上传成功后，显示的方向可能会不对，但并不影响实际存储，该页面显示的为webp格式的压缩图。
+          "编辑图片"和"AI扩图"中将显示实际方向。
+        </div>
+
         <!-- 添加编辑图片按钮 -->
         <div v-if="picture" class="edit-picture-btn-container">
           <a-button type="primary" @click="doEditPicture" class="edit-picture-btn">
             <template #icon><EditOutlined /></template>
             编辑图片
+          </a-button>
+          <a-button type="primary" @click="doImagePainting" class="ai-expand-btn">
+            <template #icon><FullscreenOutlined /></template>
+            AI 扩图
           </a-button>
           <!-- 图片裁剪组件 -->
           <ImageCropper
@@ -32,6 +42,12 @@
             :picture="picture"
             :spaceId="spaceId"
             :onSuccess="onCropSuccess"
+          />
+          <ImageOutPainting
+            ref="imageOutPaintingRef"
+            :picture="picture"
+            :spaceId="spaceId"
+            :onSuccess="onImageOutPaintingSuccess"
           />
         </div>
       </div>
@@ -96,9 +112,10 @@ import {
   listPictureTagCategoryUsingGet,
 } from '@/api/pictureController'
 import ImageCropper from '@/components/ImageCropper.vue'
+import ImageOutPainting from '@/components/ImageOutPainting.vue'
 import { useRoute, useRouter } from 'vue-router'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
-import { EditOutlined } from '@ant-design/icons-vue'
+import { EditOutlined, FullscreenOutlined } from '@ant-design/icons-vue'
 
 const picture = ref<API.PictureVo>()
 const pictureForm = reactive<API.PictureEditRequest>({})
@@ -194,7 +211,7 @@ onMounted(() => {
   getOldPicture()
 })
 
-// 图片编辑弹窗引用
+// -----图片编辑弹窗引用-----
 const imageCropperRef = ref()
 
 // 编辑图片
@@ -206,6 +223,21 @@ const doEditPicture = () => {
 
 // 编辑成功事件
 const onCropSuccess = (newPicture: API.PictureVo) => {
+  picture.value = newPicture
+}
+
+// -----AI 扩图弹窗引用-----
+const imageOutPaintingRef = ref()
+
+// AI 扩图
+const doImagePainting = () => {
+  if (imageOutPaintingRef.value) {
+    imageOutPaintingRef.value.openModal()
+  }
+}
+
+// 编辑成功事件
+const onImageOutPaintingSuccess = (newPicture: API.PictureVO) => {
   picture.value = newPicture
 }
 </script>
@@ -454,13 +486,13 @@ const onCropSuccess = (newPicture: API.PictureVo) => {
   text-align: center;
   display: flex;
   justify-content: center;
+  gap: 16px; /* 添加按钮之间的间距 */
 }
 
-.edit-picture-btn {
+.edit-picture-btn, .ai-expand-btn {
   padding: 8px 16px;
   font-size: 16px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #40a9ff, #1890ff);
   border: none;
   transition: all 0.3s;
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
@@ -469,8 +501,33 @@ const onCropSuccess = (newPicture: API.PictureVo) => {
   justify-content: center;
 }
 
-.edit-picture-btn:hover {
+.edit-picture-btn {
+  background: linear-gradient(135deg, #40a9ff, #1890ff);
+}
+
+.ai-expand-btn {
+  background: linear-gradient(135deg, #52c41a, #389e0d); /* 使用绿色渐变 */
+}
+
+.edit-picture-btn:hover, .ai-expand-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(24, 144, 255, 0.25);
+}
+
+.ai-expand-btn:hover {
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.25); /* 绿色阴影 */
+}
+.upload-tip {
+  margin: 16px 0;
+  padding: 12px;
+  font-size: 14px;
+  color: #666;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  line-height: 1.5;
+}
+
+.upload-tip :deep(.ant-alert-message) {
+  color: #666;
 }
 </style>

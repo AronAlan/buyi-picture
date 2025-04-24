@@ -1,8 +1,13 @@
 package com.xzc.buyipicturebackend.controller;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xzc.buyipicturebackend.annotation.AuthCheck;
+import com.xzc.buyipicturebackend.api.aliyun.AliyunAiApi;
+import com.xzc.buyipicturebackend.api.aliyun.model.CreateOutPaintingTaskResponse;
+import com.xzc.buyipicturebackend.api.aliyun.model.CreatePictureOutPaintingTaskRequest;
+import com.xzc.buyipicturebackend.api.aliyun.model.GetOutPaintingTaskResponse;
 import com.xzc.buyipicturebackend.api.imagesearch.ImageSearchApiFacade;
 import com.xzc.buyipicturebackend.api.imagesearch.model.ImageSearchResult;
 import com.xzc.buyipicturebackend.common.BaseResponse;
@@ -53,6 +58,9 @@ public class PictureController {
 
     @Resource
     private SpaceService spaceService;
+
+    @Resource
+    private AliyunAiApi aliyunAiApi;
 
     /**
      * 上传本地图片（可重新上传）（重新上传时，暂为直接在云中多上传一张图片，旧图片保留了，暂未删除）
@@ -425,6 +433,36 @@ public class PictureController {
         User loginUser = userService.getLoginUser(request);
         pictureService.editPictureByBatch(pictureEditByBatchRequest, loginUser);
         return ResultUtils.success(true);
+    }
+
+    /**
+     * 创建AI扩图任务
+     *
+     * @param createPictureOutPaintingTaskRequest 创建AI扩图任务请求
+     * @return 创建结果（响应）
+     */
+    @PostMapping("/out_painting/create_task")
+    public BaseResponse<CreateOutPaintingTaskResponse> createOutPaintingTask(
+            @RequestBody CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest
+            , HttpServletRequest request) {
+        ThrowUtils.throwIf(createPictureOutPaintingTaskRequest == null
+                || createPictureOutPaintingTaskRequest.getPictureId() <= 0, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        CreateOutPaintingTaskResponse response = pictureService.createPictureOutPaintingTask(createPictureOutPaintingTaskRequest, loginUser);
+        return ResultUtils.success(response);
+    }
+
+    /**
+     * 查询AI扩图任务信息或详细情况
+     *
+     * @param taskId 查询的任务id
+     * @return 查询结果（响应）
+     */
+    @GetMapping("/out_painting/get_task")
+    public BaseResponse<GetOutPaintingTaskResponse> getOutPaintingTask(String taskId) {
+        ThrowUtils.throwIf(StrUtil.isBlank(taskId), ErrorCode.PARAMS_ERROR, "查询任务id不能为空");
+        GetOutPaintingTaskResponse response = aliyunAiApi.getOutPaintingTask(taskId);
+        return ResultUtils.success(response);
     }
 
 }

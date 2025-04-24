@@ -47,12 +47,6 @@
                 删除
               </a-space>
             </template>
-            <!-- <template v-if="showOp" #actions>
-              <ShareAltOutlined @click="(e) => doShare(picture, e)" />
-              <SearchOutlined @click="(e) => doSearch(picture, e)" />
-              <EditOutlined v-if="canEdit" @click="(e) => doEdit(picture, e)" />
-              <DeleteOutlined v-if="canDelete" @click="(e) => doDelete(picture, e)" />
-            </template> -->
           </a-card>
         </a-list-item>
       </template>
@@ -70,7 +64,7 @@ import {
   ShareAltOutlined,
 } from '@ant-design/icons-vue'
 import { deletePictureUsingPost } from '@/api/pictureController.ts'
-import { message } from 'ant-design-vue'
+import { message, Modal } from 'ant-design-vue'  // 引入 Modal
 import ShareModal from '@/components/ShareModal.vue'
 import { ref } from 'vue'
 
@@ -120,13 +114,24 @@ const doDelete = async (picture, e) => {
   if (!id) {
     return
   }
-  const res = await deletePictureUsingPost({ id })
-  if (res.data.code === 0) {
-    message.success('删除成功')
-    props.onReload?.()
-  } else {
-    message.error('删除失败')
-  }
+
+  // 添加确认对话框
+  Modal.confirm({
+    title: '确认删除',
+    content: `确定要删除图片 "${picture.name}" 吗？此操作不可恢复。`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    async onOk() {
+      const res = await deletePictureUsingPost({ id })
+      if (res.data.code === 0) {
+        message.success('删除成功')
+        props.onReload?.()
+      } else {
+        message.error('删除失败，' + res.data.message)
+      }
+    }
+  })
 }
 
 // ----- 分享操作 ----
