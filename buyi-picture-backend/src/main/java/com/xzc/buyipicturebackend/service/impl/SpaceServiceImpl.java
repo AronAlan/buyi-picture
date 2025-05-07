@@ -238,6 +238,20 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
         return queryWrapper;
     }
 
+    /**
+     * 校验空间权限，仅管理员和本人有权限，否则抛异常
+     *
+     * @param loginUser 用户
+     * @param space     空间
+     */
+    @Override
+    public void checkSpaceAuth(User loginUser, Space space) {
+        // 仅本人或管理员可编辑
+        if (!space.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+    }
+
 }
 
 
