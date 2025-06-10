@@ -263,7 +263,9 @@ public class SpaceAnalyzeServiceImpl implements SpaceAnalyzeService {
     public List<SpaceUserAnalyzeResponse> getSpaceUserAnalyze(SpaceUserAnalyzeRequest spaceUserAnalyzeRequest, User loginUser) {
         ThrowUtils.throwIf(spaceUserAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         Long userId = spaceUserAnalyzeRequest.getUserId();
-        ThrowUtils.throwIf(userId == null || userId <= 0, ErrorCode.PARAMS_ERROR);
+        if (userId!=null) {
+            ThrowUtils.throwIf(userId <= 0, ErrorCode.PARAMS_ERROR);
+        }
 
         // 权限校验
         checkSpaceAnalyzeAuth(spaceUserAnalyzeRequest, loginUser);

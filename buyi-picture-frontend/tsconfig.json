@@ -6,8 +6,7 @@
     "noImplicitAny": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": false,
-    "allowImportingTsExtensions": true
+    "noFallthroughCasesInSwitch": false
   },
   "references": [
     {

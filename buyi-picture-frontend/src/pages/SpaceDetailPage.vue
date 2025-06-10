@@ -4,8 +4,15 @@
     <a-flex justify="space-between">
       <h2>{{ space.spaceName }}（私有空间）</h2>
       <a-space size="middle">
-        <a-button type="primary" :href="`/add_picture?spaceId=${id}`">
-          + 创建图片
+        <a-button type="primary" :href="`/add_picture?spaceId=${id}`"> + 创建图片 </a-button>
+        <a-button
+          type="primary"
+          ghost
+          :icon="h(BarChartOutlined)"
+          :href="`/space_analyze?spaceId=${id}`"
+          target="_blank"
+        >
+          空间分析
         </a-button>
         <a-button @click="doBatchEdit">
           <template #icon><EditOutlined /></template> 批量编辑
@@ -64,7 +71,7 @@ import { formatSize } from '@/utils'
 import PictureList from '@/components/PictureList.vue'
 import BatchEditPictureModal from '@/components/BatchEditPictureModal.vue'
 import { ColorPicker } from 'vue3-colorpicker'
-import { EditOutlined} from '@ant-design/icons-vue'
+import { EditOutlined } from '@ant-design/icons-vue'
 import 'vue3-colorpicker/style.css'
 
 interface Props {
@@ -183,7 +190,6 @@ watch(
     fetchData()
   },
 )
-
 </script>
 <style scoped>
 #spaceDetailPage {
