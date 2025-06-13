@@ -2,14 +2,13 @@ package com.xzc.buyipicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xzc.buyipicturebackend.api.aliyun.model.CreateOutPaintingTaskRequest;
 import com.xzc.buyipicturebackend.api.aliyun.model.CreateOutPaintingTaskResponse;
 import com.xzc.buyipicturebackend.api.aliyun.model.CreatePictureOutPaintingTaskRequest;
-import com.xzc.buyipicturebackend.model.dto.*;
+import com.xzc.buyipicturebackend.model.dto.picture.*;
 import com.xzc.buyipicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xzc.buyipicturebackend.model.entity.User;
-import com.xzc.buyipicturebackend.model.vo.PictureVo;
+import com.xzc.buyipicturebackend.model.vo.picture.PictureVo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

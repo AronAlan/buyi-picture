@@ -15,9 +15,8 @@ import com.qcloud.cos.model.ciModel.persistence.ProcessResults;
 import com.xzc.buyipicturebackend.config.CosClientConfig;
 import com.xzc.buyipicturebackend.exception.BusinessException;
 import com.xzc.buyipicturebackend.exception.ErrorCode;
-import com.xzc.buyipicturebackend.model.dto.UploadPictureResult;
+import com.xzc.buyipicturebackend.model.dto.picture.UploadPictureResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.File;

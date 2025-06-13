@@ -1,11 +1,11 @@
 package com.xzc.buyipicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.xzc.buyipicturebackend.model.dto.UserQueryRequest;
+import com.xzc.buyipicturebackend.model.dto.user.UserQueryRequest;
 import com.xzc.buyipicturebackend.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.xzc.buyipicturebackend.model.vo.LoginUserVo;
-import com.xzc.buyipicturebackend.model.vo.UserVo;
+import com.xzc.buyipicturebackend.model.vo.user.LoginUserVo;
+import com.xzc.buyipicturebackend.model.vo.user.UserVo;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;

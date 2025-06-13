@@ -2,12 +2,12 @@ package com.xzc.buyipicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xzc.buyipicturebackend.model.dto.SpaceAddRequest;
-import com.xzc.buyipicturebackend.model.dto.SpaceQueryRequest;
+import com.xzc.buyipicturebackend.model.dto.space.SpaceAddRequest;
+import com.xzc.buyipicturebackend.model.dto.space.SpaceQueryRequest;
 import com.xzc.buyipicturebackend.model.entity.Space;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xzc.buyipicturebackend.model.entity.User;
-import com.xzc.buyipicturebackend.model.vo.SpaceVo;
+import com.xzc.buyipicturebackend.model.vo.space.SpaceVo;
 
 import javax.servlet.http.HttpServletRequest;
 

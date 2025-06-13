@@ -25,4 +25,8 @@
         totalCount,userId,createTime,
         editTime,updateTime,isDelete
     </sql>
+
+    <insert id="insertSpaceUser" parameterType="com.xzc.buyipicturebackend.model.entity.SpaceUser">
+        insert into space_user (spaceId,userId,spaceRole) values (#{spaceId},#{userId},#{spaceRole})
+    </insert>
 </mapper>

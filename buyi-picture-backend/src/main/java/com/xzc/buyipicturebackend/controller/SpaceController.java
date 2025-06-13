@@ -9,12 +9,15 @@ import com.xzc.buyipicturebackend.exception.BusinessException;
 import com.xzc.buyipicturebackend.exception.ErrorCode;
 import com.xzc.buyipicturebackend.exception.ThrowUtils;
 import com.xzc.buyipicturebackend.model.dto.*;
+import com.xzc.buyipicturebackend.model.dto.space.SpaceAddRequest;
+import com.xzc.buyipicturebackend.model.dto.space.SpaceEditRequest;
+import com.xzc.buyipicturebackend.model.dto.space.SpaceQueryRequest;
+import com.xzc.buyipicturebackend.model.dto.space.SpaceUpdateRequest;
 import com.xzc.buyipicturebackend.model.entity.Space;
 import com.xzc.buyipicturebackend.model.entity.User;
 import com.xzc.buyipicturebackend.model.enums.SpaceLevelEnum;
-import com.xzc.buyipicturebackend.model.vo.SpaceLevel;
-import com.xzc.buyipicturebackend.model.vo.SpaceVo;
-import com.xzc.buyipicturebackend.service.PictureService;
+import com.xzc.buyipicturebackend.model.vo.space.SpaceLevel;
+import com.xzc.buyipicturebackend.model.vo.space.SpaceVo;
 import com.xzc.buyipicturebackend.service.SpaceService;
 import com.xzc.buyipicturebackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -104,7 +107,7 @@ public class SpaceController {
 
     /**
      * 分页获取空间列表（封装类）（用户）
-     * 用户进入“我的空间”时查询自己的私有空间，如果列表为0则去创建。最多1个
+     * 用户进入“我的空间”时查询自己的私有空间，如果列表为0则去创建。最多2个(团队空间和私人空间）
      *
      * @param spaceQueryRequest SpaceQueryRequest
      * @param request           HttpServletRequest
