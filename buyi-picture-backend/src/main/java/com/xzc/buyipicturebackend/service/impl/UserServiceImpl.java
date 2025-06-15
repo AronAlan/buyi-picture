@@ -9,13 +9,14 @@ import com.xzc.buyipicturebackend.constant.UserConstant;
 import com.xzc.buyipicturebackend.exception.BusinessException;
 import com.xzc.buyipicturebackend.exception.ErrorCode;
 import com.xzc.buyipicturebackend.exception.ThrowUtils;
+import com.xzc.buyipicturebackend.manager.auth.StpKit;
+import com.xzc.buyipicturebackend.mapper.UserMapper;
 import com.xzc.buyipicturebackend.model.dto.user.UserQueryRequest;
-import com.xzc.buyipicturebackend.model.enums.UserRoleEnum;
 import com.xzc.buyipicturebackend.model.entity.User;
+import com.xzc.buyipicturebackend.model.enums.UserRoleEnum;
 import com.xzc.buyipicturebackend.model.vo.user.LoginUserVo;
 import com.xzc.buyipicturebackend.model.vo.user.UserVo;
 import com.xzc.buyipicturebackend.service.UserService;
-import com.xzc.buyipicturebackend.mapper.UserMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -114,8 +115,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
 
-        // 4.记录用户登录态
+        // 4.记录用户登录态---权限校验体系1
         request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
+        // 5.记录用户登录态到sa-token，供于空间鉴权使用---权限校验体系2
+        StpKit.SPACE.login(user.getId());
+        StpKit.SPACE.getSession().set(UserConstant.USER_LOGIN_STATE, user);
         return getLoginUserVO(user);
     }
 
@@ -197,7 +201,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
     public List<UserVo> getUserVoList(List<User> userList) {
-        if (CollUtil.isEmpty(userList)){
+        if (CollUtil.isEmpty(userList)) {
             return new ArrayList<>();
         }
 
@@ -212,7 +216,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
     public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
-        ThrowUtils.throwIf(userQueryRequest==null,ErrorCode.PARAMS_ERROR,"请求参数为空");
+        ThrowUtils.throwIf(userQueryRequest == null, ErrorCode.PARAMS_ERROR, "请求参数为空");
 
         Long id = userQueryRequest.getId();
         String userName = userQueryRequest.getUserName();
@@ -224,12 +228,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         //构造QueryWrapper
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(ObjUtil.isNotNull(id),"id",id);
-        queryWrapper.eq(StrUtil.isNotBlank(userAccount),"userAccount",userAccount);
-        queryWrapper.eq(StrUtil.isNotBlank(userName),"userName",userName);
-        queryWrapper.eq(StrUtil.isNotBlank(userProfile),"userProfile",userProfile);
-        queryWrapper.eq(StrUtil.isNotBlank(userRole),"userRole",userRole);
-        queryWrapper.orderBy(StrUtil.isNotBlank(sortField),sortOrder.equals("ascend"),sortField);
+        queryWrapper.eq(ObjUtil.isNotNull(id), "id", id);
+        queryWrapper.eq(StrUtil.isNotBlank(userAccount), "userAccount", userAccount);
+        queryWrapper.eq(StrUtil.isNotBlank(userName), "userName", userName);
+        queryWrapper.eq(StrUtil.isNotBlank(userProfile), "userProfile", userProfile);
+        queryWrapper.eq(StrUtil.isNotBlank(userRole), "userRole", userRole);
+        queryWrapper.orderBy(StrUtil.isNotBlank(sortField), sortOrder.equals("ascend"), sortField);
 
         return queryWrapper;
     }
