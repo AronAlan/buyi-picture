@@ -63,7 +63,6 @@ import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
 import PictureSearchForm from '@/components/PictureSearchForm.vue'
 import { message } from 'ant-design-vue'
 import {
-  listPictureVoByPageUsingPost,
   listSpacePictureVoByPageUsingPost,
   searchPictureByColorUsingPost,
 } from '@/api/pictureController.ts'

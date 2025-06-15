@@ -70,6 +70,7 @@ import java.util.stream.Collectors;
  * @description 针对表【picture(图片)】的数据库操作Service实现
  * @createDate 2024-12-31 16:05:11
  */
+@SuppressWarnings("AlibabaRemoveCommentedCode")
 @Slf4j
 @Service
 public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
@@ -132,9 +133,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             Space space = spaceService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
             // 必须空间创建人（管理员）才能上传
-            if (!loginUser.getId().equals(space.getUserId())) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间权限");
-            }
+            //if (!loginUser.getId().equals(space.getUserId())) {
+            //    throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间权限");
+            //}
             // 校验额度
             if (space.getTotalCount() >= space.getMaxCount()) {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "空间条数已满");
@@ -155,9 +156,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             // 但是每次上传，都会保存（也相当于修改了）图片信息到数据库
             // 主要为了防止他人通过修改参数信息来篡改所属他人的已存在的图片
             //（不验证身份信息的话，请求体参数中增加一个pictureUploadRequest，即可修改他人的图片信息）
-            if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-            }
+            //if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            //    throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+            //}
 
             // 校验空间是否一致
             // 没传 spaceId，则复用原有图片的 spaceId
@@ -678,7 +679,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
 
         // 校验权限：公共图库的图片仅本人或管理员可删除；私有图库的图片仅本人可删除
-        checkPictureAuth(loginUser, picture);
+        //checkPictureAuth(loginUser, picture);
 
         // 开启事务，更新数据库并释放空间额度
         transactionTemplate.execute(status -> {
@@ -761,7 +762,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
 
         // 公共图库的图片本人或管理员可编辑；私有图库的图片仅本人可编辑
-        checkPictureAuth(loginUser, oldPicture);
+        //checkPictureAuth(loginUser, oldPicture);
 
         // 补充审核参数
         if (oldPicture.getSpaceId() != null) {
@@ -775,6 +776,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     }
 
     /**
+     * 已改为sa-token注解鉴权
      * 校验登录用户对当前图片的权限
      * 公共图库的图片，上传者和管理员能删除
      * 私有空间的图片仅拥有者能够删除，管理员也不能私自删除
@@ -782,21 +784,21 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
      * @param loginUser User
      * @param picture   Picture
      */
-    @Override
-    public void checkPictureAuth(User loginUser, Picture picture) {
-        Long spaceId = picture.getSpaceId();
-        if (spaceId == null) {
-            // 公共图库，仅本人或管理员可操作
-            if (!picture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-            }
-        } else {
-            // 私有空间，仅空间管理员可操作
-            if (!picture.getUserId().equals(loginUser.getId())) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-            }
-        }
-    }
+    //    @Override
+    //    public void checkPictureAuth(User loginUser, Picture picture) {
+    //        Long spaceId = picture.getSpaceId();
+    //        if (spaceId == null) {
+    //            // 公共图库，仅本人或管理员可操作
+    //            if (!picture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+    //                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+    //            }
+    //        } else {
+    //            // 私有空间，仅本人可操作
+    //            if (!picture.getUserId().equals(loginUser.getId())) {
+    //                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+    //            }
+    //        }
+    //    }
 
     /**
      * 个人空间下根据主色调搜索图片
@@ -814,9 +816,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 校验空间权限
         Space space = spaceService.getById(spaceId);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
-        if (!loginUser.getId().equals(space.getUserId())) {
+        /*if (!loginUser.getId().equals(space.getUserId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间访问权限");
-        }
+        }*/
 
         // 查询空间下所有图片（包含主色调的）
         List<Picture> pictureList = this.lambdaQuery()
@@ -864,7 +866,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     @Transactional(rollbackFor = Exception.class)
     public void editPictureByBatch(PictureEditByBatchRequest pictureEditByBatchRequest, User loginUser) {
         // 校验参数
-        ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
+        //ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         List<Long> pictureIdList = pictureEditByBatchRequest.getPictureIdList();
         Long spaceId = pictureEditByBatchRequest.getSpaceId();
         ThrowUtils.throwIf(spaceId == null || CollUtil.isEmpty(pictureIdList), ErrorCode.PARAMS_ERROR);
@@ -872,7 +874,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 校验空间权限
         Space space = spaceService.getById(spaceId);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
-        ThrowUtils.throwIf(!loginUser.getId().equals(space.getUserId()), ErrorCode.NO_AUTH_ERROR, "无空间访问权限");
+        //ThrowUtils.throwIf(!loginUser.getId().equals(space.getUserId()), ErrorCode.NO_AUTH_ERROR, "无空间访问权限");
 
         // 查询出所需要修改的图片，仅选择需要的字段
         List<Picture> pictureList = this.lambdaQuery()
@@ -956,7 +958,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "图片不存在"));
 
         // 权限校验
-        checkPictureAuth(loginUer, picture);
+        //checkPictureAuth(loginUer, picture);
 
         // 构造创建扩图任务的请求
         CreateOutPaintingTaskRequest taskRequest = new CreateOutPaintingTaskRequest();

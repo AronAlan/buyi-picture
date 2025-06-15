@@ -151,7 +151,7 @@ public interface PictureService extends IService<Picture> {
      * @param loginUser User
      * @param picture   Picture
      */
-    void checkPictureAuth(User loginUser, Picture picture);
+    //void checkPictureAuth(User loginUser, Picture picture);
 
     /**
      * 编辑图片

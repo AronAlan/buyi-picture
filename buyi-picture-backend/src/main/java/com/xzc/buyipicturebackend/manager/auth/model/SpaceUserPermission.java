@@ -1,5 +1,7 @@
 package com.xzc.buyipicturebackend.manager.auth.model;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -8,6 +10,7 @@ import java.io.Serializable;
  * @author: Samoyer
  * @date: 2025-06-13
  */
+@Data
 public class SpaceUserPermission implements Serializable {
 
     /**

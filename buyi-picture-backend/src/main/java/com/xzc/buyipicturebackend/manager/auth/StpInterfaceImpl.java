@@ -25,6 +25,7 @@ import com.xzc.buyipicturebackend.service.SpaceService;
 import com.xzc.buyipicturebackend.service.SpaceUserService;
 import com.xzc.buyipicturebackend.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -42,6 +43,7 @@ import java.util.Map;
  * @author: Samoyer
  * @date: 2025-06-15
  */
+@Component
 public class StpInterfaceImpl implements StpInterface {
 
     @Value("${server.servlet.context-path}")
@@ -64,6 +66,10 @@ public class StpInterfaceImpl implements StpInterface {
 
     /**
      * 返回一个账号所拥有的权限码集合
+     *
+     * @param loginId   登录id
+     * @param loginType 需要校验的类型
+     * @return 权限列表
      */
     @Override
     public List<String> getPermissionList(Object loginId, String loginType) {

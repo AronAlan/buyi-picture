@@ -6,6 +6,8 @@ import com.xzc.buyipicturebackend.common.ResultUtils;
 import com.xzc.buyipicturebackend.exception.BusinessException;
 import com.xzc.buyipicturebackend.exception.ErrorCode;
 import com.xzc.buyipicturebackend.exception.ThrowUtils;
+import com.xzc.buyipicturebackend.manager.auth.annotation.SaSpaceCheckPermission;
+import com.xzc.buyipicturebackend.manager.auth.model.SpaceUserPermissionConstant;
 import com.xzc.buyipicturebackend.model.dto.DeleteRequest;
 import com.xzc.buyipicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.xzc.buyipicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
@@ -47,6 +49,7 @@ public class SpaceUserController {
      * @return spaceUser的id
      */
     @PostMapping("/add")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<Long> addSpaceUser(@RequestBody SpaceUserAddRequest spaceUserAddRequest) {
         ThrowUtils.throwIf(spaceUserAddRequest == null, ErrorCode.PARAMS_ERROR);
         long id = spaceUserService.addSpaceUser(spaceUserAddRequest);
@@ -60,6 +63,7 @@ public class SpaceUserController {
      * @return 移除成功
      */
     @PostMapping("/delete")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<Boolean> deleteSpace(@RequestBody DeleteRequest deleteRequest) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -83,6 +87,7 @@ public class SpaceUserController {
      * @return SpaceUser
      */
     @PostMapping("/get")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<SpaceUser> getSpaceById(@RequestBody SpaceUserQueryRequest spaceUserQueryRequest) {
         ThrowUtils.throwIf(spaceUserQueryRequest == null, ErrorCode.PARAMS_ERROR);
         Long spaceId = spaceUserQueryRequest.getSpaceId();
@@ -103,6 +108,7 @@ public class SpaceUserController {
      * @return List<SpaceUserVo>
      */
     @PostMapping("/list")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<List<SpaceUserVo>> listSpaceUser(@RequestBody SpaceUserQueryRequest spaceUserQueryRequest) {
         ThrowUtils.throwIf(spaceUserQueryRequest == null, ErrorCode.PARAMS_ERROR);
         List<SpaceUser> spaceUserList = spaceUserService.list(
@@ -118,6 +124,7 @@ public class SpaceUserController {
      * @return 编辑成功
      */
     @PostMapping("/edit")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<Boolean> editSpaceUser(@RequestBody SpaceUserEditRequest spaceUserEditRequest) {
         ThrowUtils.throwIf(spaceUserEditRequest == null || spaceUserEditRequest.getId() <= 0, ErrorCode.PARAMS_ERROR);
 

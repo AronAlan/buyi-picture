@@ -8,6 +8,10 @@ import com.xzc.buyipicturebackend.constant.UserConstant;
 import com.xzc.buyipicturebackend.exception.BusinessException;
 import com.xzc.buyipicturebackend.exception.ErrorCode;
 import com.xzc.buyipicturebackend.exception.ThrowUtils;
+import com.xzc.buyipicturebackend.manager.auth.SpaceUserAuthManager;
+import com.xzc.buyipicturebackend.manager.auth.StpKit;
+import com.xzc.buyipicturebackend.manager.auth.annotation.SaSpaceCheckPermission;
+import com.xzc.buyipicturebackend.manager.auth.model.SpaceUserPermissionConstant;
 import com.xzc.buyipicturebackend.model.dto.*;
 import com.xzc.buyipicturebackend.model.dto.space.SpaceAddRequest;
 import com.xzc.buyipicturebackend.model.dto.space.SpaceEditRequest;
@@ -22,6 +26,7 @@ import com.xzc.buyipicturebackend.service.SpaceService;
 import com.xzc.buyipicturebackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -47,6 +52,9 @@ public class SpaceController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
 
     /**
      * 添加创建私有图库空间
@@ -83,7 +91,7 @@ public class SpaceController {
         ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR);
 
         // 仅本人或者管理员可删除
-        spaceService.checkSpaceAuth(loginUser,oldSpace);
+        spaceService.checkSpaceAuth(loginUser, oldSpace);
 
         // 操作数据库
         boolean result = spaceService.removeById(id);
@@ -150,6 +158,7 @@ public class SpaceController {
      * @return SpaceVO
      */
     @GetMapping("/get/vo")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<SpaceVo> getSpaceVoById(long id, HttpServletRequest request) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         // 查询数据库
@@ -157,11 +166,15 @@ public class SpaceController {
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR);
 
         // 非本人查询
-        if (!userService.getLoginUser(request).getId().equals(space.getUserId())){
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"您无权限查看他人的私有图库空间");
-        }
+        //if (!userService.getLoginUser(request).getId().equals(space.getUserId())){
+        //    throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"您无权限查看他人的私有图库空间");
+        //}
+        //改为权限列表鉴权，并将权限列表返回前端供方便展示或隐藏内容
+        List<String> permissionList = spaceUserAuthManager.getPermissionList(space, userService.getLoginUser(request));
+        SpaceVo spaceVo = spaceService.getSpaceVo(space, request);
+        spaceVo.setPermissionList(permissionList);
         // 获取封装类
-        return ResultUtils.success(spaceService.getSpaceVo(space, request));
+        return ResultUtils.success(spaceVo);
     }
 
     /**
@@ -221,7 +234,7 @@ public class SpaceController {
         Space oldSpace = spaceService.getById(id);
         ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可编辑
-        spaceService.checkSpaceAuth(loginUser,oldSpace);
+        spaceService.checkSpaceAuth(loginUser, oldSpace);
         // 操作数据库
         boolean result = spaceService.updateById(space);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
